@@ -1,0 +1,142 @@
+{
+  "kind": "build_request",
+  "title": "WCA speedcubing timer with official WCA scrambles (all events), scramble images, and mobile/desktop controls",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a responsive speedcubing timer screen that works on both desktop and mobile layouts, with a clear scramble display area, a timer display, and basic on-screen instructions for controls.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Timer should works on both mobile and  desktop with touch and hold to start or using space bar"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On desktop and mobile viewport sizes, the scramble and timer are readable without horizontal scrolling.",
+        "The UI includes brief English instructions for how to start/stop using touch-and-hold and the space bar.",
+        "Layout adapts for portrait mobile (stacked) and wider desktop (more spacious) views."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add an event selector that includes all official WCA events and drives scramble generation/visualization for the selected event.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Must have all wca events along with its scramble and image."
+        ]
+      },
+      "acceptanceCriteria": [
+        "All current WCA events are available in the selector (one entry per event).",
+        "Changing the selected event updates subsequent generated scrambles to match that event.",
+        "User-facing event names are in English."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Integrate the official WCA scramble generator to generate scrambles per selected WCA event, and provide a \"New Scramble\" action to generate the next scramble.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Create a wca based speedcubing timer by using official wca scramble generator"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Scrambles are generated using the official WCA scramble generator implementation (not a custom scramble algorithm).",
+        "A user can generate a new scramble on demand and the scramble text updates immediately.",
+        "The scramble text is selectable/copyable and displayed in English-friendly formatting."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Display a scramble image/visualization corresponding to the currently displayed scramble and selected event, alongside the scramble text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Must have all wca events along with its scramble and image."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When a scramble is shown, a corresponding visual scramble image is also shown for that event (when the official generator/visualizer supports it).",
+        "The scramble image updates whenever the scramble changes.",
+        "If an event does not support a visualization, show a clear English fallback message (e.g., \"No visualization available for this event\")."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement WCA-style timer controls: on desktop, space bar touch/hold behavior (hold to arm, release to start; press to stop); on mobile, touch-and-hold to arm then release to start; tap/press to stop.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "touch and hold to start or using space bar"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Desktop: holding Space arms the timer; releasing Space starts timing; pressing Space again stops timing.",
+        "Mobile: pressing and holding on the timer area arms the timer; releasing starts timing; tapping while running stops timing.",
+        "The UI provides clear visual state feedback for at least: idle, armed/ready, running, stopped (e.g., color/status text).",
+        "Default browser behaviors (e.g., page scroll on Space) do not interfere with timing when the timer screen is focused."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "After stopping the timer, keep the final time visible until the next start, and ensure generating a new scramble is available without breaking timer state (e.g., only when not running).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Stopping the timer freezes the displayed time and it remains visible.",
+        "The app prevents scramble changes while the timer is running (or clearly confirms/blocks it) to avoid accidental mid-solve changes.",
+        "Starting a new solve uses the currently displayed scramble for that solve attempt."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Apply a coherent, distinctive visual theme (colors, typography, spacing, and component styling) appropriate for a speedcubing timer, and enforce it consistently across the app (avoid default/basic styling).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app uses a consistent theme across event selector, scramble display, scramble image panel, timer, and controls/instructions.",
+        "Theme does not rely on a blue/purple primary palette.",
+        "Text contrast and sizing are suitable for quick readability during solves."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui; compose and use these as-is.",
+    "Backend must remain a single Motoko actor (do not introduce additional backend services).",
+    "Use English for all user-facing text."
+  ],
+  "nonGoals": [
+    "Implementing user accounts, authentication flows, or Internet Identity login UX (not requested).",
+    "Storing solve history, statistics, averages, penalties (+2/DNF), or exporting sessions (not requested).",
+    "Real-time multiplayer or sharing links (not requested)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

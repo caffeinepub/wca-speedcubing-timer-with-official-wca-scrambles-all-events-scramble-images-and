@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build a WCA-compliant speedcubing timer that uses the official WCA scramble generator, supports all WCA events with scramble text and scramble images, and works on mobile/desktop with touch-and-hold and spacebar controls.",
+  "architectural_notes": [
+    "Scramble generation must use the official WCA scramble generator (not a custom/random implementation)."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-responsive-speedcubing-timer-screen-that-works-on-both-desktop-and-mobile-layouts-with-a-clear-scramble-display-area-a-timer-display-and-basic-on-screen-instructions-for-controls",
+      "title": "Create a responsive speedcubing timer screen that works on both desktop and mobile layouts, with a clear scramble display area, a timer display, and basic on-screen instructions for controls.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-event-selector-that-includes-all-official-wca-events-and-drives-scramble-generation-visualization-for-the-selected-event",
+      "title": "Add an event selector that includes all official WCA events and drives scramble generation/visualization for the selected event.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-the-official-wca-scramble-generator-to-generate-scrambles-per-selected-wca-event-and-provide-a-new-scramble-action-to-generate-the-next-scramble",
+      "title": "Integrate the official WCA scramble generator to generate scrambles per selected WCA event, and provide a \"New Scramble\" action to generate the next scramble.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-a-scramble-image-visualization-corresponding-to-the-currently-displayed-scramble-and-selected-event-alongside-the-scramble-text",
+      "title": "Display a scramble image/visualization corresponding to the currently displayed scramble and selected event, alongside the scramble text.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-wca-style-timer-controls-on-desktop-space-bar-touch-hold-behavior-hold-to-arm-release-to-start-press-to-stop-on-mobile-touch-and-hold-to-arm-then-release-to-start-tap-press-to-stop",
+      "title": "Implement WCA-style timer controls: on desktop, space bar touch/hold behavior (hold to arm, release to start; press to stop); on mobile, touch-and-hold to arm then release to start; tap/press to stop.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-after-stopping-the-timer-keep-the-final-time-visible-until-the-next-start-and-ensure-generating-a-new-scramble-is-available-without-breaking-timer-state-e-g-only-when-not-running",
+      "title": "After stopping the timer, keep the final time visible until the next start, and ensure generating a new scramble is available without breaking timer state (e.g., only when not running).",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-coherent-distinctive-visual-theme-colors-typography-spacing-and-component-styling-appropriate-for-a-speedcubing-timer-and-enforce-it-consistently-across-the-app-avoid-default-basic-styling",
+      "title": "Apply a coherent, distinctive visual theme (colors, typography, spacing, and component styling) appropriate for a speedcubing timer, and enforce it consistently across the app (avoid default/basic styling).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Use the official WCA scramble generator to generate scrambles per event",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Support all WCA events and show the correct scramble for the selected event",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Display scramble images/visualizations for each generated scramble",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Implement a timer UI that works on both mobile and desktop",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add touch-and-hold to start/stop on mobile and spacebar control on desktop",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "WCA speedcubing timer with official WCA scrambles (all events), scramble images, and mobile/desktop controls",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

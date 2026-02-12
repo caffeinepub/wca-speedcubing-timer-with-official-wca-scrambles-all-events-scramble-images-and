@@ -1,0 +1,18 @@
+{
+  "frontend/src/App.tsx": "Main application component that wraps TimerScreen with ThemeProvider for dark mode support.",
+  "frontend/src/lib/wcaEvents.ts": "Defines all official WCA events with their IDs, display names, and scramble event mappings.",
+  "frontend/src/hooks/useWcaScramble.ts": "Custom hook that generates official WCA scrambles using cubing.js from CDN via dynamic import for better build compatibility.",
+  "frontend/src/hooks/useWcaTimerControls.ts": "Custom hook implementing WCA-style timer state machine with spacebar and touch-and-hold controls, managing idle/armed/running/stopped states.",
+  "frontend/src/components/TimerScreen.tsx": "Main screen component orchestrating event selection, scramble display, visualization, timer, and instructions with responsive layout.",
+  "frontend/src/components/EventSelector.tsx": "Dropdown selector component for choosing WCA events, disabled during active solves.",
+  "frontend/src/components/ScramblePanel.tsx": "Card component displaying the current scramble text with a refresh button to generate new scrambles.",
+  "frontend/src/components/ScrambleVisualizer.tsx": "Component that renders 2D puzzle visualizations using cubing.js TwistyPlayer loaded from CDN for better build compatibility.",
+  "frontend/src/components/TimerDisplay.tsx": "Large interactive timer display with touch/pointer controls, showing formatted time and state-based colors.",
+  "frontend/src/index.css": "Global styles with orange/amber OKLCH color theme for speedcubing timer, including timer-specific state colors.",
+  "frontend/tailwind.config.js": "Tailwind configuration extended with timer-specific colors, custom fonts, and design tokens.",
+  "frontend/package.json": "Package configuration with cubing package removed since we're using CDN imports instead.",
+  "frontend/src/hooks/useQueries.ts": "Empty file as all functionality is client-side; no backend queries needed.",
+  "frontend/src/types/cubing.d.ts": "TypeScript declaration file providing type definitions for cubing.js CDN modules to resolve module import errors.",
+  "frontend/vite.config.js": "Vite configuration with basic setup, removing cubing-specific optimizations since we're using CDN imports.",
+  "frontend/tsconfig.json": "TypeScript configuration with ES2022 target and bundler module resolution to support cubing.js package exports."
+}

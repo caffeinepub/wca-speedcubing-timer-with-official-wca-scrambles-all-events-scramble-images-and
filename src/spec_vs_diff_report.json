@@ -1,0 +1,68 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-12T22:37:46.730Z",
+  "summary": "Implements a responsive timer screen with event selector, official cubing.js (CDN) scramble generation, a TwistyPlayer-based visualization panel, WCA-style space/touch hold controls, and a custom orange/amber theme. However, the event list is incomplete vs. “all official WCA events”, and visualization fallback/unsupported-event handling is not clearly implemented (it defaults to 3x3). Also includes Internet Identity/auth scaffolding that was explicitly a non-goal.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Event selector includes all official WCA events (one entry per event), with English names, and drives scramble generation/visualization for the selected event.",
+      "reason": "The provided WCA_EVENTS list only contains a subset of official events (e.g., it includes 333, 222, 444... plus some BLD/FMC/OH, but does not show the full current WCA set). From the diff summary alone, it does not satisfy “all official WCA events”.",
+      "evidence": [
+        "frontend/src/lib/wcaEvents.ts",
+        "frontend/src/components/EventSelector.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "If an event does not support a visualization, show a clear English fallback message (e.g., \"No visualization available for this event\").",
+      "reason": "ScrambleVisualizer always maps unknown/unsupported eventIds to a default puzzleName of '3x3x3' rather than detecting unsupported events and showing a fallback. The fallback message only appears on exceptions, not on unsupported events.",
+      "evidence": [
+        "frontend/src/components/ScrambleVisualizer.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Internet Identity / authenticated-vs-anonymous actor plumbing (InternetIdentityProvider usage and identity-aware useActor hook).",
+      "reason": "BuildRequest non-goals explicitly exclude implementing user accounts/auth flows/Internet Identity login UX; the timer app requirements are entirely frontend timer/scramble related. The diff adds/uses Internet Identity and actor fetching logic anyway.",
+      "evidence": [
+        "frontend/src/main.tsx",
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/hooks/useInternetIdentity.ts"
+      ]
+    },
+    {
+      "description": "GitHub link in header pointing to cubing.js repository.",
+      "reason": "Not requested in any requirement or acceptance criteria.",
+      "evidence": [
+        "frontend/src/components/TimerScreen.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/EventSelector.tsx",
+    "frontend/src/components/ScramblePanel.tsx",
+    "frontend/src/components/ScrambleVisualizer.tsx",
+    "frontend/src/components/TimerDisplay.tsx",
+    "frontend/src/components/TimerScreen.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useWcaScramble.ts",
+    "frontend/src/hooks/useWcaTimerControls.ts",
+    "frontend/src/index.css",
+    "frontend/src/lib/wcaEvents.ts",
+    "frontend/src/main.tsx",
+    "frontend/src/types/cubing.d.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

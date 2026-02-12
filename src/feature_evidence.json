@@ -1,0 +1,143 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-responsive-speedcubing-timer-screen-that-works-on-both-desktop-and-mobile-layouts-with-a-clear-scramble-display-area-a-timer-display-and-basic-on-screen-instructions-for-controls",
+      "featureTitle": "Create a responsive speedcubing timer screen that works on both desktop and mobile layouts, with a clear scramble display area, a timer display, and basic on-screen instructions for controls.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/TimerScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-event-selector-that-includes-all-official-wca-events-and-drives-scramble-generation-visualization-for-the-selected-event",
+      "featureTitle": "Add an event selector that includes all official WCA events and drives scramble generation/visualization for the selected event.",
+      "files": [
+        "frontend/src/components/EventSelector.tsx",
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/lib/wcaEvents.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-integrate-the-official-wca-scramble-generator-to-generate-scrambles-per-selected-wca-event-and-provide-a-new-scramble-action-to-generate-the-next-scramble",
+      "featureTitle": "Integrate the official WCA scramble generator to generate scrambles per selected WCA event, and provide a \"New Scramble\" action to generate the next scramble.",
+      "files": [
+        "frontend/src/components/ScramblePanel.tsx",
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/hooks/useWcaScramble.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-display-a-scramble-image-visualization-corresponding-to-the-currently-displayed-scramble-and-selected-event-alongside-the-scramble-text",
+      "featureTitle": "Display a scramble image/visualization corresponding to the currently displayed scramble and selected event, alongside the scramble text.",
+      "files": [
+        "frontend/src/components/ScrambleVisualizer.tsx",
+        "frontend/src/components/TimerScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-wca-style-timer-controls-on-desktop-space-bar-touch-hold-behavior-hold-to-arm-release-to-start-press-to-stop-on-mobile-touch-and-hold-to-arm-then-release-to-start-tap-press-to-stop",
+      "featureTitle": "Implement WCA-style timer controls: on desktop, space bar touch/hold behavior (hold to arm, release to start; press to stop); on mobile, touch-and-hold to arm then release to start; tap/press to stop.",
+      "files": [
+        "frontend/src/components/TimerDisplay.tsx",
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/hooks/useWcaTimerControls.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-stopping-the-timer-keep-the-final-time-visible-until-the-next-start-and-ensure-generating-a-new-scramble-is-available-without-breaking-timer-state-e-g-only-when-not-running",
+      "featureTitle": "After stopping the timer, keep the final time visible until the next start, and ensure generating a new scramble is available without breaking timer state (e.g., only when not running).",
+      "files": [
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/hooks/useWcaScramble.ts",
+        "frontend/src/hooks/useWcaTimerControls.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-coherent-distinctive-visual-theme-colors-typography-spacing-and-component-styling-appropriate-for-a-speedcubing-timer-and-enforce-it-consistently-across-the-app-avoid-default-basic-styling",
+      "featureTitle": "Apply a coherent, distinctive visual theme (colors, typography, spacing, and component styling) appropriate for a speedcubing timer, and enforce it consistently across the app (avoid default/basic styling).",
+      "files": [
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

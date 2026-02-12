@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.75rem;
+        
+        /* Speedcubing timer theme - Orange/Amber palette */
+        --background: 0.98 0 0;
+        --foreground: 0.15 0 0;
+        --card: 1 0 0;
+        --card-foreground: 0.15 0 0;
+        --popover: 1 0 0;
+        --popover-foreground: 0.15 0 0;
+        
+        /* Primary: Vibrant Orange */
+        --primary: 0.65 0.20 45;
+        --primary-foreground: 1 0 0;
+        
+        /* Secondary: Warm Amber */
+        --secondary: 0.92 0.08 75;
+        --secondary-foreground: 0.25 0 0;
+        
+        --muted: 0.95 0.02 75;
+        --muted-foreground: 0.50 0.03 75;
+        
+        --accent: 0.88 0.12 65;
+        --accent-foreground: 0.20 0 0;
+        
+        --destructive: 0.55 0.24 25;
+        --destructive-foreground: 1 0 0;
+        
+        --border: 0.88 0.04 75;
+        --input: 0.88 0.04 75;
+        --ring: 0.65 0.20 45;
+        
+        /* Timer-specific colors */
+        --timer-primary: 0.65 0.20 45;
+        --timer-secondary: 0.70 0.18 35;
+        --timer-armed: 0.55 0.22 140;
+        --timer-running: 0.65 0.20 45;
+        --timer-stopped: 0.55 0.22 140;
+    }
+
+    .dark {
+        --background: 0.12 0.02 270;
+        --foreground: 0.98 0.01 75;
+        --card: 0.18 0.03 270;
+        --card-foreground: 0.98 0.01 75;
+        --popover: 0.15 0.03 270;
+        --popover-foreground: 0.98 0.01 75;
+        
+        /* Primary: Bright Orange for dark mode */
+        --primary: 0.70 0.22 45;
+        --primary-foreground: 0.12 0.02 270;
+        
+        /* Secondary: Warm Amber */
+        --secondary: 0.30 0.08 65;
+        --secondary-foreground: 0.98 0.01 75;
+        
+        --muted: 0.25 0.04 270;
+        --muted-foreground: 0.65 0.04 270;
+        
+        --accent: 0.35 0.10 55;
+        --accent-foreground: 0.98 0.01 75;
+        
+        --destructive: 0.60 0.22 25;
+        --destructive-foreground: 0.98 0.01 75;
+        
+        --border: 0.25 0.04 270;
+        --input: 0.25 0.04 270;
+        --ring: 0.70 0.22 45;
+        
+        /* Timer-specific colors for dark mode */
+        --timer-primary: 0.70 0.22 45;
+        --timer-secondary: 0.75 0.20 35;
+        --timer-armed: 0.65 0.20 140;
+        --timer-running: 0.70 0.22 45;
+        --timer-stopped: 0.65 0.20 140;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    kbd {
+        @apply inline-flex items-center justify-center;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+}
+
+@layer utilities {
+    .text-timer-armed {
+        color: oklch(var(--timer-armed));
+    }
+    
+    .text-timer-running {
+        color: oklch(var(--timer-running));
+    }
+    
+    .text-timer-stopped {
+        color: oklch(var(--timer-stopped));
+    }
+    
+    .bg-timer-primary {
+        background-color: oklch(var(--timer-primary));
+    }
+    
+    .bg-timer-secondary {
+        background-color: oklch(var(--timer-secondary));
+    }
+}
