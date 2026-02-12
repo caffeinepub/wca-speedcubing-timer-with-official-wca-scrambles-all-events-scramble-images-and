@@ -1,224 +1,81 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T22:37:46.733Z",
+  "generatedAt": "2026-02-12T23:34:22.142Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 7,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Create a responsive speedcubing timer screen that works on both desktop and mobile layouts, with a clear scramble display area, a timer display, and basic on-screen instructions for controls.",
+        "summary": "Fix the inspection countdown so it visibly counts down from 15.00 to 0.00 during inspection after the user triggers inspection with a press-and-hold, and ensure the countdown continues updating every frame until inspection ends or the solve starts (no freezing at 15.00).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/TimerScreen.tsx",
-          "frontend/src/components/layout/AppShell.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts",
+          "frontend/src/components/TimerDisplay.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts",
+          "frontend/src/components/TimerDisplay.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Add an event selector that includes all official WCA events and drives scramble generation/visualization for the selected event.",
+        "summary": "Implement the inspection warning behavior so that at 8 seconds remaining there is a warning, and when inspection reaches 5 seconds remaining it visibly shows \"5 sec\" and plays the 5-second warning sound; both warnings must reliably trigger once per inspection.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/lib/wcaEvents.ts",
-          "frontend/src/components/EventSelector.tsx",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts",
+          "frontend/src/components/TimerDisplay.tsx",
+          "frontend/src/lib/inspectionAudio.ts"
         ],
         "matchedFiles": [
-          "frontend/src/lib/wcaEvents.ts",
-          "frontend/src/components/EventSelector.tsx",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts",
+          "frontend/src/components/TimerDisplay.tsx",
+          "frontend/src/lib/inspectionAudio.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Integrate the official WCA scramble generator to generate scrambles per selected WCA event, and provide a \"New Scramble\" action to generate the next scramble.",
+        "summary": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/package.json",
-          "frontend/src/hooks/useWcaScramble.ts",
-          "frontend/src/components/ScramblePanel.tsx",
+          "frontend/src/hooks/useWcaTimerControls.ts",
           "frontend/src/components/TimerScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useWcaScramble.ts",
-          "frontend/src/components/ScramblePanel.tsx",
+          "frontend/src/hooks/useWcaTimerControls.ts",
           "frontend/src/components/TimerScreen.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Display a scramble image/visualization corresponding to the currently displayed scramble and selected event, alongside the scramble text.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/package.json",
-          "frontend/src/components/ScrambleVisualizer.tsx",
-          "frontend/src/components/TimerScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ScrambleVisualizer.tsx",
-          "frontend/src/components/TimerScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Implement WCA-style timer controls: on desktop, space bar touch/hold behavior (hold to arm, release to start; press to stop); on mobile, touch-and-hold to arm then release to start; tap/press to stop.",
+        "summary": "Apply inspection penalty rules exactly as requested: inspection display counts down to 0.00 (not below), but starting the solve up to 2 seconds after inspection hits 0.00 results in a +2 penalty; starting after that results in DNF.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/hooks/useWcaTimerControls.ts",
           "frontend/src/components/TimerDisplay.tsx",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/types/solves.ts"
         ],
         "matchedFiles": [
           "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx",
-          "frontend/src/components/TimerScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "After stopping the timer, keep the final time visible until the next start, and ensure generating a new scramble is available without breaking timer state (e.g., only when not running).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/hooks/useWcaScramble.ts",
-          "frontend/src/components/TimerScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/hooks/useWcaScramble.ts",
-          "frontend/src/components/TimerScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Apply a coherent, distinctive visual theme (colors, typography, spacing, and component styling) appropriate for a speedcubing timer, and enforce it consistently across the app (avoid default/basic styling).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/TimerScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/components/TimerDisplay.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
-    "build-template/Dockerfile",
-    "build-template/LICENSE",
-    "build-template/README.md",
-    "build-template/deploy.sh",
-    "build-template/icp.yaml",
-    "build-template/package.json",
-    "build-template/pnpm-lock.yaml",
-    "build-template/pnpm-workspace.yaml",
-    "build-template/scripts/prune-unused-images.js",
-    "build-template/scripts/resize-images.js",
-    "build-template/src/backend/canister.yaml",
-    "build-template/src/backend/system-idl/aaaaa-aa.did",
-    "build-template/src/frontend/canister.yaml",
-    "build-template/src/frontend/components.json",
-    "build-template/src/frontend/env.json",
-    "build-template/src/frontend/eslint-rules/no-bigint-in-query-keys.js",
-    "build-template/src/frontend/eslint-rules/require-internet-identity-provider.js",
-    "build-template/src/frontend/eslint.config.js",
-    "build-template/src/frontend/package.json",
-    "build-template/src/frontend/postcss.config.js",
-    "build-template/src/frontend/src/components/ui/accordion.tsx",
-    "build-template/src/frontend/src/components/ui/alert-dialog.tsx",
-    "build-template/src/frontend/src/components/ui/alert.tsx",
-    "build-template/src/frontend/src/components/ui/aspect-ratio.tsx",
-    "build-template/src/frontend/src/components/ui/avatar.tsx",
-    "build-template/src/frontend/src/components/ui/badge.tsx",
-    "build-template/src/frontend/src/components/ui/breadcrumb.tsx",
-    "build-template/src/frontend/src/components/ui/button.tsx",
-    "build-template/src/frontend/src/components/ui/calendar.tsx",
-    "build-template/src/frontend/src/components/ui/card.tsx",
-    "build-template/src/frontend/src/components/ui/carousel.tsx",
-    "build-template/src/frontend/src/components/ui/chart.tsx",
-    "build-template/src/frontend/src/components/ui/checkbox.tsx",
-    "build-template/src/frontend/src/components/ui/collapsible.tsx",
-    "build-template/src/frontend/src/components/ui/command.tsx",
-    "build-template/src/frontend/src/components/ui/context-menu.tsx",
-    "build-template/src/frontend/src/components/ui/dialog.tsx",
-    "build-template/src/frontend/src/components/ui/drawer.tsx",
-    "build-template/src/frontend/src/components/ui/dropdown-menu.tsx",
-    "build-template/src/frontend/src/components/ui/form.tsx",
-    "build-template/src/frontend/src/components/ui/hover-card.tsx",
-    "build-template/src/frontend/src/components/ui/input-otp.tsx",
-    "build-template/src/frontend/src/components/ui/input.tsx",
-    "build-template/src/frontend/src/components/ui/label.tsx",
-    "build-template/src/frontend/src/components/ui/menubar.tsx",
-    "build-template/src/frontend/src/components/ui/navigation-menu.tsx",
-    "build-template/src/frontend/src/components/ui/pagination.tsx",
-    "build-template/src/frontend/src/components/ui/popover.tsx",
-    "build-template/src/frontend/src/components/ui/progress.tsx",
-    "build-template/src/frontend/src/components/ui/radio-group.tsx",
-    "build-template/src/frontend/src/components/ui/resizable.tsx",
-    "build-template/src/frontend/src/components/ui/scroll-area.tsx",
-    "build-template/src/frontend/src/components/ui/select.tsx",
-    "build-template/src/frontend/src/components/ui/separator.tsx",
-    "build-template/src/frontend/src/components/ui/sheet.tsx",
-    "build-template/src/frontend/src/components/ui/sidebar.tsx",
-    "build-template/src/frontend/src/components/ui/skeleton.tsx",
-    "build-template/src/frontend/src/components/ui/slider.tsx",
-    "build-template/src/frontend/src/components/ui/sonner.tsx",
-    "build-template/src/frontend/src/components/ui/switch.tsx",
-    "build-template/src/frontend/src/components/ui/table.tsx",
-    "build-template/src/frontend/src/components/ui/tabs.tsx",
-    "build-template/src/frontend/src/components/ui/textarea.tsx",
-    "build-template/src/frontend/src/components/ui/toggle-group.tsx",
-    "build-template/src/frontend/src/components/ui/toggle.tsx",
-    "build-template/src/frontend/src/components/ui/tooltip.tsx",
-    "build-template/src/frontend/src/hooks/use-mobile.tsx",
-    "build-template/src/frontend/src/lib/utils.ts",
-    "build-template/src/frontend/tsconfig.json",
-    "build-template/src/frontend/vite.config.js",
-    "build-template/tsconfig.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/EventSelector.tsx",
-    "frontend/src/components/ScramblePanel.tsx",
-    "frontend/src/components/ScrambleVisualizer.tsx",
     "frontend/src/components/TimerDisplay.tsx",
     "frontend/src/components/TimerScreen.tsx",
-    "frontend/src/config.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useWcaScramble.ts",
     "frontend/src/hooks/useWcaTimerControls.ts",
-    "frontend/src/index.css",
-    "frontend/src/lib/wcaEvents.ts",
-    "frontend/src/main.tsx",
-    "frontend/src/types/cubing.d.ts",
-    "frontend/src/ui-summary.json",
-    "frontend/src/utils/StorageClient.ts",
-    "frontend/tailwind.config.js",
+    "frontend/src/lib/inspectionAudio.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

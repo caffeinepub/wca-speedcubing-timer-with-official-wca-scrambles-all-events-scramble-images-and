@@ -1,15 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Build a responsive WCA speedcubing timer that supports all official WCA events with official scrambles, scramble visualizations when available, and WCA-style mobile/desktop controls.
+**Goal:** Make WCA inspection work correctly: countdown progression, 8s/5s warnings, start-on-release controls, and +2/DNF timing rules.
 
 **Planned changes:**
-- Create a mobile/desktop responsive timer screen with dedicated areas for scramble text, scramble visualization, timer display, and brief English control instructions.
-- Add an event selector containing all official WCA events; selection drives scramble generation and visualization behavior.
-- Integrate the official WCA scramble generator and add a “New Scramble” action to fetch the next scramble for the selected event.
-- Show a scramble image/visualization for the current scramble when supported; otherwise display a clear English fallback message.
-- Implement WCA-style timing interactions: desktop Space hold-to-arm/release-to-start and Space to stop; mobile touch-and-hold to arm/release-to-start and tap to stop; include clear visual state feedback (idle/armed/running/stopped).
-- Preserve the final time after stopping until the next solve, and prevent/disable scramble changes while the timer is running.
-- Apply a consistent, distinctive visual theme across all components (not using a blue/purple primary palette).
+- Fix inspection countdown to visibly and smoothly decrease from 15.00 to 0.00, updating every frame during inspection and stopping when the solve starts.
+- Implement reliable one-time inspection warnings: an 8-second warning sound, and at 5 seconds remaining show “5 sec” and play the 5-second warning sound.
+- Ensure input behavior matches start-on-release: holding arms the timer, releasing starts the solve (for both Spacebar and touch/pointer); solve time does not increment while holding.
+- Apply requested inspection penalty rules: clamp inspection display at 0.00 (no negatives); starting within 2 seconds after 0.00 applies +2 (display trailing “+”); starting after 2 seconds results in DNF.
 
-**User-visible outcome:** Users can select any official WCA event, generate official scrambles (with a matching visualization when available), and time solves using WCA-style controls on both desktop (Space) and mobile (touch), with a clear themed UI and stable timer/scramble behavior.
+**User-visible outcome:** Inspection counts down correctly from 15 to 0 with proper 8s/5s warnings, the timer starts on release (not while holding), and solves started late correctly show +2 or DNF based on the 2-second grace period.

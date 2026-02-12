@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useWcaScramble(eventId: string) {
-  const [scramble, setScramble] = useState<string>('');
+export function useWcaScramble(eventId: string, initialScramble?: string) {
+  const [scramble, setScramble] = useState<string>(initialScramble || '');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateScramble = useCallback(async () => {
@@ -20,12 +20,16 @@ export function useWcaScramble(eventId: string) {
   }, [eventId]);
 
   useEffect(() => {
-    generateScramble();
-  }, [generateScramble]);
+    // Only generate if we don't have an initial scramble
+    if (!initialScramble) {
+      generateScramble();
+    }
+  }, [eventId, generateScramble, initialScramble]);
 
   return {
     scramble,
     isGenerating,
     generateScramble,
+    setScramble,
   };
 }

@@ -1,193 +1,100 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "WCA speedcubing timer (official scrambles + visualization) with mobile/desktop controls",
+  "title": "WCA inspection countdown + warnings reliability and start-on-release timing rules",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Build a responsive timer screen with readable scramble + timer areas and concise English control instructions for desktop/mobile.",
+      "summary": "Make inspection countdown animate smoothly from 15.00 to 0.00 with per-frame updates and no freeze, and stop updates when solve starts or inspection ends.",
       "acceptanceCriteria": [
-        "On desktop and mobile viewport sizes, the scramble and timer are readable without horizontal scrolling.",
-        "The UI includes brief English instructions for how to start/stop using touch-and-hold and the space bar.",
-        "Layout adapts for portrait mobile (stacked) and wider desktop (more spacious) views."
+        "On desktop (Space) and mobile (touch/pointer), starting inspection causes the displayed inspection time to decrease smoothly from ~15.00 down to 0.00 without getting stuck.",
+        "Inspection countdown updates are not dependent on stale React state (i.e., it continues animating reliably after state transitions).",
+        "Starting a solve from inspection stops the inspection countdown updates."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
-          "operation": "create",
-          "description": "Create the app's main composition to render a single responsive timer screen (no extra routes) and provide the overall layout scaffolding for scramble, visualization, timer display, and instructions."
+          "path": "frontend/src/hooks/useWcaTimerControls.ts",
+          "operation": "modify",
+          "description": "Refactor inspection countdown animation to use requestAnimationFrame driven by refs (not React state closures) so the countdown always updates each frame once inspection begins. Ensure the inspection RAF loop continues while inspection is active (including when the user is holding/armed during inspection), clamps displayed remaining time to 0.00, and is canceled/terminated immediately when the solve starts or inspection is reset."
         },
         {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "create",
-          "description": "Implement the responsive timer screen layout (stacked on portrait; more spacious on desktop), including dedicated areas for scramble text, scramble visualization panel, timer readout, and brief English instructions."
-        },
-        {
-          "path": "frontend/src/components/layout/AppShell.tsx",
-          "operation": "create",
-          "description": "Create a lightweight layout wrapper to standardize spacing and responsive container behavior across the timer screen, ensuring readability without horizontal scrolling."
+          "path": "frontend/src/components/TimerDisplay.tsx",
+          "operation": "modify",
+          "description": "Ensure the inspection time display renders centiseconds smoothly from the inspectionTime value provided by the timer controls, and that the UI correctly switches away from inspection display when the solve starts (no lingering inspection updates)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add an all-official WCA event selector that drives scramble generation and visualization for the chosen event.",
+      "summary": "Implement reliable single-fire 8s and 5s inspection warnings (sound + '5 sec' UI) that trigger on threshold crossing even with frame skips.",
       "acceptanceCriteria": [
-        "All current WCA events are available in the selector (one entry per event).",
-        "Changing the selected event updates subsequent generated scrambles to match that event.",
-        "User-facing event names are in English."
+        "During inspection, exactly one 8-second warning sound plays when remaining time crosses 8 seconds.",
+        "During inspection, exactly one 5-second warning sound plays when remaining time crosses 5 seconds.",
+        "When remaining time is at/under 5 seconds (and inspection is still active), the timer UI shows an explicit \"5 sec\" warning text (in English).",
+        "Warnings trigger reliably even if the frame timing skips over narrow millisecond windows."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/wcaEvents.ts",
-          "operation": "create",
-          "description": "Define a single source of truth for all official WCA events (English label + event id) and any mapping needed for the official scramble generator/visualizer integration."
-        },
-        {
-          "path": "frontend/src/components/EventSelector.tsx",
-          "operation": "create",
-          "description": "Create an event selector UI using the shadcn-ui Select component to choose among all WCA events and notify the parent of changes. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
+          "path": "frontend/src/hooks/useWcaTimerControls.ts",
           "operation": "modify",
-          "description": "Wire the EventSelector into the timer screen and ensure the selected event is the single driver for scramble generation and visualization updates."
+          "description": "Replace narrow millisecond-window warning checks with robust threshold-crossing logic using a previousRemaining ref (e.g., prev > 8000 && remaining <= 8000) and one-shot refs for each warning. Ensure audio initialization is invoked on the first qualifying user gesture for inspection/arming so warning sounds can play reliably."
+        },
+        {
+          "path": "frontend/src/components/TimerDisplay.tsx",
+          "operation": "modify",
+          "description": "Add explicit \"5 sec\" warning text to the timer UI whenever inspection is still active and remaining time is <= 5 seconds (including if the user is currently armed/holding), without relying on brittle timing windows."
+        },
+        {
+          "path": "frontend/src/lib/inspectionAudio.ts",
+          "operation": "modify",
+          "description": "Harden Web Audio initialization/playback behavior so play*Warning methods remain no-ops until initialized, and initialization is resilient (e.g., resumes context when needed) to maximize reliability of 8s/5s warning sounds during inspection."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Integrate the official WCA scramble generator and add a New Scramble action to generate the next scramble for the selected event.",
+      "summary": "Enforce start-on-release controls for both Spacebar and pointer: arming happens on hold; solve starts only on release from armed; during inspection, hold to arm and release to start solve.",
       "acceptanceCriteria": [
-        "Scrambles are generated using the official WCA scramble generator implementation (not a custom scramble algorithm).",
-        "A user can generate a new scramble on demand and the scramble text updates immediately.",
-        "The scramble text is selectable/copyable and displayed in English-friendly formatting."
+        "While holding (armed), the solve timer does not increment.",
+        "On release from the armed state, the solve timer starts immediately and increments.",
+        "The same behavior works for both pointer (touch/mouse) and Spacebar input."
       ],
       "file_operations": [
         {
-          "path": "frontend/package.json",
+          "path": "frontend/src/hooks/useWcaTimerControls.ts",
           "operation": "modify",
-          "description": "Add/confirm frontend dependencies for the official WCA scramble generator implementation and any required peer/runtime packages so scrambles are generated from the official library (not a custom algorithm)."
-        },
-        {
-          "path": "frontend/src/hooks/useWcaScramble.ts",
-          "operation": "create",
-          "description": "Implement a hook that, given a selected WCA event, produces the current scramble text and a function to generate the next scramble using the official WCA scramble generator implementation."
-        },
-        {
-          "path": "frontend/src/components/ScramblePanel.tsx",
-          "operation": "create",
-          "description": "Create a scramble display panel that renders selectable/copyable scramble text and exposes a New Scramble action using the shadcn-ui Button component. Verify the component's usage instructions before implementing."
+          "description": "Audit and adjust the state machine so that (1) the timer never transitions to running while input is held, (2) the only transition into running is on release from the armed state, and (3) during inspection a subsequent hold arms without stopping inspection countdown and release starts the solve immediately. Ensure parity between Spacebar and pointer handlers."
         },
         {
           "path": "frontend/src/components/TimerScreen.tsx",
           "operation": "modify",
-          "description": "Wire useWcaScramble + ScramblePanel into the screen so changing event affects subsequent scrambles and New Scramble updates the currently displayed scramble immediately."
+          "description": "Update any user-facing control instructions text if needed to accurately reflect the corrected start-on-release behavior for both desktop and mobile, matching the implemented control flow."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Show a scramble visualization corresponding to the current scramble + selected event, with a clear fallback when unsupported.",
+      "summary": "Apply inspection penalty timing rules: display clamps at 0.00; start within +2s after 0.00 => plus2; start later => dnf; and ensure recorded solves display '+' or 'DNF'.",
       "acceptanceCriteria": [
-        "When a scramble is shown, a corresponding visual scramble image is also shown for that event (when the official generator/visualizer supports it).",
-        "The scramble image updates whenever the scramble changes.",
-        "If an event does not support a visualization, show a clear English fallback message (e.g., \"No visualization available for this event\")."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/package.json",
-          "operation": "modify",
-          "description": "Add/confirm frontend dependencies for scramble visualization rendering (aligned with the official scramble toolchain where supported) to produce a scramble image/visual representation for supported events."
-        },
-        {
-          "path": "frontend/src/components/ScrambleVisualizer.tsx",
-          "operation": "create",
-          "description": "Implement a visualization component that renders an event-appropriate scramble image/visualization for the current scramble and updates when scramble/event changes; show an English fallback message when visualization isn't supported."
-        },
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "modify",
-          "description": "Place ScrambleVisualizer alongside the scramble text in the layout and ensure it re-renders whenever the scramble changes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Implement WCA-style timer controls for spacebar and touch-and-hold with clear visual feedback for idle/armed/running/stopped.",
-      "acceptanceCriteria": [
-        "Desktop: holding Space arms the timer; releasing Space starts timing; pressing Space again stops timing.",
-        "Mobile: pressing and holding on the timer area arms the timer; releasing starts timing; tapping while running stops timing.",
-        "The UI provides clear visual state feedback for at least: idle, armed/ready, running, stopped (e.g., color/status text).",
-        "Default browser behaviors (e.g., page scroll on Space) do not interfere with timing when the timer screen is focused."
+        "The inspection timer display never shows negative values; it clamps at 0.00 once inspection time has elapsed.",
+        "If the solve is started after inspection time is up but within 2 seconds of inspection reaching 0.00, the recorded solve has inspectionOutcome = \"plus2\" and history/stats display the time with a trailing \"+\".",
+        "If the solve is started more than 2 seconds after inspection reaches 0.00, the recorded solve has inspectionOutcome = \"dnf\" and displays as \"DNF\"."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useWcaTimerControls.ts",
-          "operation": "create",
-          "description": "Create a timer-control hook implementing the WCA-style state machine (idle/armed/running/stopped) and handling keyboard (Space keydown/keyup) and pointer/touch press-hold-release behavior, including preventing default Space scrolling when focused."
+          "operation": "modify",
+          "description": "Implement inspection penalty computation based on the actual time elapsed since inspection started (or explicitly since the moment inspection hit 0.00 via a ref timestamp), while keeping the displayed countdown clamped to 0.00. Ensure the computed inspectionOutcome is captured at solve start, and that the outcome is plus2 only for (15s, 17s] and dnf for >17s."
         },
         {
           "path": "frontend/src/components/TimerDisplay.tsx",
-          "operation": "create",
-          "description": "Create a large, high-contrast timer display that reflects the current control state (idle/armed/running/stopped) via styling/status text and exposes the interactive area for touch/press interactions."
+          "operation": "modify",
+          "description": "Confirm final result rendering continues to display 'DNF' for dnf and appends '+' for plus2, consistent with the recorded inspectionOutcome."
         },
         {
-          "path": "frontend/src/components/TimerScreen.tsx",
+          "path": "frontend/src/types/solves.ts",
           "operation": "modify",
-          "description": "Wire useWcaTimerControls into TimerDisplay and ensure the screen captures focus appropriately for Space controls while preserving mobile touch interactions."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Freeze final time after stop and prevent scramble changes while running; ensure next solve uses the currently shown scramble.",
-      "acceptanceCriteria": [
-        "Stopping the timer freezes the displayed time and it remains visible.",
-        "The app prevents scramble changes while the timer is running (or clearly confirms/blocks it) to avoid accidental mid-solve changes.",
-        "Starting a new solve uses the currently displayed scramble for that solve attempt."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useWcaTimerControls.ts",
-          "operation": "modify",
-          "description": "Ensure the timer hook retains the last stopped time until a new solve begins, and exposes an explicit \"running\" flag/state for UI gating (e.g., disabling scramble changes while running)."
-        },
-        {
-          "path": "frontend/src/hooks/useWcaScramble.ts",
-          "operation": "modify",
-          "description": "Add support for gating scramble generation and event changes while a solve is running (e.g., expose safe methods and/or allow the caller to disable actions) so scrambles cannot change mid-solve."
-        },
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "modify",
-          "description": "Disable or block EventSelector and New Scramble while running (and keep them enabled otherwise), and ensure the currently displayed scramble is treated as the solve's scramble until the next start."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Apply a cohesive, distinctive, non-blue/purple visual theme with strong readability across the timer UI.",
-      "acceptanceCriteria": [
-        "The app uses a consistent theme across event selector, scramble display, scramble image panel, timer, and controls/instructions.",
-        "Theme does not rely on a blue/purple primary palette.",
-        "Text contrast and sizing are suitable for quick readability during solves."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "create",
-          "description": "Define global theme tokens (CSS variables used by Tailwind/shadcn-ui) and base typography/spacing to create a distinctive speedcubing-timer look with a non-blue/purple primary palette and high contrast."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Adjust/extend Tailwind theme configuration as needed to support the chosen timer theme (e.g., additional semantic colors for timer states like armed/running/stopped) while keeping styling consistent across the app."
-        },
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "modify",
-          "description": "Apply consistent themed styling to event selector, scramble text, visualization panel, timer display, and instructions so the app avoids default/basic styling and remains highly readable during solves."
+          "description": "Verify formatting helpers correctly represent +2 as a trailing '+' (and apply +2000ms only for numeric calculations) and DNF as 'DNF', aligning history/stats display with the updated inspectionOutcome rules."
         }
       ]
     }

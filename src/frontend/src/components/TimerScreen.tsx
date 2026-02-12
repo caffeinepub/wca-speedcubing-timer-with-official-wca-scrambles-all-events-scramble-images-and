@@ -1,16 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EventSelector } from './EventSelector';
 import { ScramblePanel } from './ScramblePanel';
 import { ScrambleVisualizer } from './ScrambleVisualizer';
 import { TimerDisplay } from './TimerDisplay';
+import { SolveHistory } from './SolveHistory';
+import { SessionStats } from './SessionStats';
 import { useWcaScramble } from '../hooks/useWcaScramble';
 import { useWcaTimerControls } from '../hooks/useWcaTimerControls';
+import { SolveEntry } from '../types/solves';
+import { computeSessionStats } from '../lib/sessionStats';
+import { saveSessionData, loadSessionData } from '../lib/sessionCookie';
 import { SiGithub } from 'react-icons/si';
+import { Heart } from 'lucide-react';
 
 export function TimerScreen() {
   const [selectedEvent, setSelectedEvent] = useState('333');
-  const { scramble, isGenerating, generateScramble } = useWcaScramble(selectedEvent);
+  const [solves, setSolves] = useState<SolveEntry[]>([]);
+  const [initialScramble, setInitialScramble] = useState<string | undefined>(undefined);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load session data on mount
+  useEffect(() => {
+    const savedData = loadSessionData();
+    if (savedData) {
+      setSelectedEvent(savedData.event);
+      setSolves(savedData.solves);
+      setInitialScramble(savedData.scramble);
+    }
+    setIsInitialized(true);
+  }, []);
+
+  const { scramble, isGenerating, generateScramble, setScramble } = useWcaScramble(
+    selectedEvent,
+    initialScramble
+  );
   const timerControls = useWcaTimerControls();
+
+  // Save session data whenever it changes
+  useEffect(() => {
+    if (isInitialized) {
+      saveSessionData({
+        event: selectedEvent,
+        scramble,
+        solves,
+      });
+    }
+  }, [selectedEvent, scramble, solves, isInitialized]);
+
+  // Auto-generate new scramble after solve stops
+  useEffect(() => {
+    if (timerControls.state === 'stopped' && timerControls.finalResult) {
+      // Add solve to history
+      const newSolve: SolveEntry = {
+        id: `${Date.now()}-${Math.random()}`,
+        time: timerControls.finalResult.time,
+        event: selectedEvent,
+        scramble: scramble,
+        timestamp: Date.now(),
+        inspectionOutcome: timerControls.finalResult.inspectionOutcome,
+      };
+      
+      setSolves(prev => [...prev, newSolve]);
+      
+      // Generate new scramble after a brief delay
+      setTimeout(() => {
+        generateScramble();
+      }, 100);
+    }
+  }, [timerControls.state, timerControls.finalResult]);
 
   const handleNewScramble = () => {
     if (!timerControls.isRunning) {
@@ -25,6 +82,8 @@ export function TimerScreen() {
       timerControls.reset();
     }
   };
+
+  const stats = computeSessionStats(solves);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -78,6 +137,12 @@ export function TimerScreen() {
           <TimerDisplay {...timerControls} />
         </div>
 
+        {/* Session Stats */}
+        <SessionStats stats={stats} />
+
+        {/* Solve History */}
+        <SolveHistory solves={solves} />
+
         {/* Instructions */}
         <div className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-xl p-6">
           <h3 className="text-sm font-semibold mb-3 text-center">How to Use</h3>
@@ -88,7 +153,7 @@ export function TimerScreen() {
               </div>
               <div>
                 <p className="font-medium text-foreground mb-1">Desktop</p>
-                <p className="text-xs">Hold <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Space</kbd> to arm, release to start. Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Space</kbd> again to stop.</p>
+                <p className="text-xs">Hold <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Space</kbd> to start inspection (15s). Hold again to arm, release to start solve. Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Space</kbd> to stop.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -97,9 +162,14 @@ export function TimerScreen() {
               </div>
               <div>
                 <p className="font-medium text-foreground mb-1">Mobile</p>
-                <p className="text-xs">Press and hold the timer to arm, release to start. Tap to stop.</p>
+                <p className="text-xs">Press and hold to start inspection. Hold again to arm, release to start solve. Tap to stop.</p>
               </div>
             </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-border/40">
+            <p className="text-xs text-center text-muted-foreground">
+              <strong>Inspection Rules:</strong> 15 seconds to inspect. Warnings at 8s and 5s. Start within +2s after 0 for +2 penalty. After +2s = DNF.
+            </p>
           </div>
         </div>
       </main>
@@ -108,28 +178,17 @@ export function TimerScreen() {
       <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            Built with ❤️ using{' '}
+            Built with <Heart className="inline w-4 h-4 text-destructive fill-destructive" /> using{' '}
             <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== 'undefined' ? window.location.hostname : 'wca-timer')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-foreground hover:underline"
+              className="font-medium hover:text-foreground transition-colors"
             >
               caffeine.ai
             </a>
-            {' • '}
-            Powered by{' '}
-            <a
-              href="https://github.com/cubing/cubing.js"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground hover:underline"
-            >
-              cubing.js
-            </a>
-            {' • '}
-            © {new Date().getFullYear()}
           </p>
+          <p className="mt-1 text-xs">© {new Date().getFullYear()} WCA Timer. All rights reserved.</p>
         </div>
       </footer>
     </div>

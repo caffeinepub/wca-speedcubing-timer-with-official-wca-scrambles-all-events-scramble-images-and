@@ -1,142 +1,111 @@
 {
   "kind": "build_request",
-  "title": "WCA speedcubing timer with official WCA scrambles (all events), scramble images, and mobile/desktop controls",
+  "title": "Fix WCA inspection countdown progression and 8s/5s warnings; ensure start-on-release and +2/DNF timing rules",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create a responsive speedcubing timer screen that works on both desktop and mobile layouts, with a clear scramble display area, a timer display, and basic on-screen instructions for controls.",
+      "text": "Fix the inspection countdown so it visibly counts down from 15.00 to 0.00 during inspection after the user triggers inspection with a press-and-hold, and ensure the countdown continues updating every frame until inspection ends or the solve starts (no freezing at 15.00).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6",
+          "msg-8",
+          "msg-10"
         ],
         "quotes": [
-          "Timer should works on both mobile and  desktop with touch and hold to start or using space bar"
+          "Inspection doesn't work like counting doesn't work and 8 second and 5 second warning not showing with sound",
+          "When touch and hold it start but no counting happens.",
+          "Counting should work like 15 to 0"
         ]
       },
       "acceptanceCriteria": [
-        "On desktop and mobile viewport sizes, the scramble and timer are readable without horizontal scrolling.",
-        "The UI includes brief English instructions for how to start/stop using touch-and-hold and the space bar.",
-        "Layout adapts for portrait mobile (stacked) and wider desktop (more spacious) views."
+        "On desktop (Space) and mobile (touch/pointer), starting inspection causes the displayed inspection time to decrease smoothly from ~15.00 down to 0.00 without getting stuck.",
+        "Inspection countdown updates are not dependent on stale React state (i.e., it continues animating reliably after state transitions).",
+        "Starting a solve from inspection stops the inspection countdown updates."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add an event selector that includes all official WCA events and drives scramble generation/visualization for the selected event.",
+      "text": "Implement the inspection warning behavior so that at 8 seconds remaining there is a warning, and when inspection reaches 5 seconds remaining it visibly shows \"5 sec\" and plays the 5-second warning sound; both warnings must reliably trigger once per inspection.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6",
+          "msg-8"
         ],
         "quotes": [
-          "Must have all wca events along with its scramble and image."
+          "8 second and 5 second warning not showing with sound",
+          "warning on 8 sec and when reached 5 it says 5 sec"
         ]
       },
       "acceptanceCriteria": [
-        "All current WCA events are available in the selector (one entry per event).",
-        "Changing the selected event updates subsequent generated scrambles to match that event.",
-        "User-facing event names are in English."
+        "During inspection, exactly one 8-second warning sound plays when remaining time crosses 8 seconds.",
+        "During inspection, exactly one 5-second warning sound plays when remaining time crosses 5 seconds.",
+        "When remaining time is at/under 5 seconds (and inspection is still active), the timer UI shows an explicit \"5 sec\" warning text (in English).",
+        "Warnings trigger reliably even if the frame timing skips over narrow millisecond windows."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Integrate the official WCA scramble generator to generate scrambles per selected WCA event, and provide a \"New Scramble\" action to generate the next scramble.",
+      "text": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-9"
         ],
         "quotes": [
-          "Create a wca based speedcubing timer by using official wca scramble generator"
+          "After releasing timer starts"
         ]
       },
       "acceptanceCriteria": [
-        "Scrambles are generated using the official WCA scramble generator implementation (not a custom scramble algorithm).",
-        "A user can generate a new scramble on demand and the scramble text updates immediately.",
-        "The scramble text is selectable/copyable and displayed in English-friendly formatting."
+        "While holding (armed), the solve timer does not increment.",
+        "On release from the armed state, the solve timer starts immediately and increments.",
+        "The same behavior works for both pointer (touch/mouse) and Spacebar input."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Display a scramble image/visualization corresponding to the currently displayed scramble and selected event, alongside the scramble text.",
+      "text": "Apply inspection penalty rules exactly as requested: inspection display counts down to 0.00 (not below), but starting the solve up to 2 seconds after inspection hits 0.00 results in a +2 penalty; starting after that results in DNF.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-8",
+          "msg-9"
         ],
         "quotes": [
-          "Must have all wca events along with its scramble and image."
+          "till -2 is +2 and after that dnf",
+          "stop at 0 and till -2 is +2 and after that dnf"
         ]
       },
       "acceptanceCriteria": [
-        "When a scramble is shown, a corresponding visual scramble image is also shown for that event (when the official generator/visualizer supports it).",
-        "The scramble image updates whenever the scramble changes.",
-        "If an event does not support a visualization, show a clear English fallback message (e.g., \"No visualization available for this event\")."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Implement WCA-style timer controls: on desktop, space bar touch/hold behavior (hold to arm, release to start; press to stop); on mobile, touch-and-hold to arm then release to start; tap/press to stop.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "touch and hold to start or using space bar"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Desktop: holding Space arms the timer; releasing Space starts timing; pressing Space again stops timing.",
-        "Mobile: pressing and holding on the timer area arms the timer; releasing starts timing; tapping while running stops timing.",
-        "The UI provides clear visual state feedback for at least: idle, armed/ready, running, stopped (e.g., color/status text).",
-        "Default browser behaviors (e.g., page scroll on Space) do not interfere with timing when the timer screen is focused."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "After stopping the timer, keep the final time visible until the next start, and ensure generating a new scramble is available without breaking timer state (e.g., only when not running).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Stopping the timer freezes the displayed time and it remains visible.",
-        "The app prevents scramble changes while the timer is running (or clearly confirms/blocks it) to avoid accidental mid-solve changes.",
-        "Starting a new solve uses the currently displayed scramble for that solve attempt."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Apply a coherent, distinctive visual theme (colors, typography, spacing, and component styling) appropriate for a speedcubing timer, and enforce it consistently across the app (avoid default/basic styling).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The app uses a consistent theme across event selector, scramble display, scramble image panel, timer, and controls/instructions.",
-        "Theme does not rely on a blue/purple primary palette.",
-        "Text contrast and sizing are suitable for quick readability during solves."
+        "The inspection timer display never shows negative values; it clamps at 0.00 once inspection time has elapsed.",
+        "If the solve is started after inspection time is up but within 2 seconds of inspection reaching 0.00, the recorded solve has inspectionOutcome = \"plus2\" and history/stats display the time with a trailing \"+\".",
+        "If the solve is started more than 2 seconds after inspection reaches 0.00, the recorded solve has inspectionOutcome = \"dnf\" and displays as \"DNF\"."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui; compose and use these as-is.",
-    "Backend must remain a single Motoko actor (do not introduce additional backend services).",
-    "Use English for all user-facing text."
+    "Do not edit any files under frontend/src/components/ui or any path listed in frontend.immutablePaths in SYSTEM_CONTEXT.",
+    "Keep backend as a single Motoko actor; no new backend services."
   ],
   "nonGoals": [
-    "Implementing user accounts, authentication flows, or Internet Identity login UX (not requested).",
-    "Storing solve history, statistics, averages, penalties (+2/DNF), or exporting sessions (not requested).",
-    "Real-time multiplayer or sharing links (not requested)."
+    "Adding new authentication methods (only Internet Identity is supported).",
+    "Adding real-time/networked features (e.g., WebSockets, multiplayer, live leaderboards).",
+    "Changing scramble generation logic or adding new WCA events beyond what already exists."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

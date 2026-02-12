@@ -1,104 +1,53 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build a WCA-compliant speedcubing timer that uses the official WCA scramble generator, supports all WCA events with scramble text and scramble images, and works on mobile/desktop with touch-and-hold and spacebar controls.",
+  "summary": "New project",
   "architectural_notes": [
-    "Scramble generation must use the official WCA scramble generator (not a custom/random implementation)."
+    "Timer interaction: touch-and-hold arms the timer; timer starts on release (not while holding).",
+    "Timer logic: countdown from 15 to 0; 8s warning and 5s warning (with sound). At 5 it should announce '5 sec'.",
+    "Result rules: 0 to -2 counts as +2; anything past -2 is DNF."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Inspection/timer countdown not progressing after touch-and-hold release.",
+    "8-second and 5-second warning indicators/sounds not triggering as expected."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-responsive-speedcubing-timer-screen-that-works-on-both-desktop-and-mobile-layouts-with-a-clear-scramble-display-area-a-timer-display-and-basic-on-screen-instructions-for-controls",
-      "title": "Create a responsive speedcubing timer screen that works on both desktop and mobile layouts, with a clear scramble display area, a timer display, and basic on-screen instructions for controls.",
+      "id": "feature-fix-the-inspection-countdown-so-it-visibly-counts-down-from-15-00-to-0-00-during-inspection-after-the-user-triggers-inspection-with-a-press-and-hold-and-ensure-the-countdown-continues-updating-every-frame-until-inspection-ends-or-the-solve-starts-no-freezing-at-15-00",
+      "title": "Fix the inspection countdown so it visibly counts down from 15.00 to 0.00 during inspection after the user triggers inspection with a press-and-hold, and ensure the countdown continues updating every frame until inspection ends or the solve starts (no freezing at 15.00).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-event-selector-that-includes-all-official-wca-events-and-drives-scramble-generation-visualization-for-the-selected-event",
-      "title": "Add an event selector that includes all official WCA events and drives scramble generation/visualization for the selected event.",
+      "id": "feature-implement-the-inspection-warning-behavior-so-that-at-8-seconds-remaining-there-is-a-warning-and-when-inspection-reaches-5-seconds-remaining-it-visibly-shows-5-sec-and-plays-the-5-second-warning-sound-both-warnings-must-reliably-trigger-once-per-inspection",
+      "title": "Implement the inspection warning behavior so that at 8 seconds remaining there is a warning, and when inspection reaches 5 seconds remaining it visibly shows \"5 sec\" and plays the 5-second warning sound; both warnings must reliably trigger once per inspection.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-integrate-the-official-wca-scramble-generator-to-generate-scrambles-per-selected-wca-event-and-provide-a-new-scramble-action-to-generate-the-next-scramble",
-      "title": "Integrate the official WCA scramble generator to generate scrambles per selected WCA event, and provide a \"New Scramble\" action to generate the next scramble.",
+      "id": "feature-ensure-touch-hold-and-spacebar-controls-follow-the-timer-starts-only-after-the-user-releases-not-while-holding-once-armed-during-inspection-holding-again-arms-and-releasing-starts-the-solve-timer",
+      "title": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-display-a-scramble-image-visualization-corresponding-to-the-currently-displayed-scramble-and-selected-event-alongside-the-scramble-text",
-      "title": "Display a scramble image/visualization corresponding to the currently displayed scramble and selected event, alongside the scramble text.",
+      "id": "feature-apply-inspection-penalty-rules-exactly-as-requested-inspection-display-counts-down-to-0-00-not-below-but-starting-the-solve-up-to-2-seconds-after-inspection-hits-0-00-results-in-a-2-penalty-starting-after-that-results-in-dnf",
+      "title": "Apply inspection penalty rules exactly as requested: inspection display counts down to 0.00 (not below), but starting the solve up to 2 seconds after inspection hits 0.00 results in a +2 penalty; starting after that results in DNF.",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-implement-wca-style-timer-controls-on-desktop-space-bar-touch-hold-behavior-hold-to-arm-release-to-start-press-to-stop-on-mobile-touch-and-hold-to-arm-then-release-to-start-tap-press-to-stop",
-      "title": "Implement WCA-style timer controls: on desktop, space bar touch/hold behavior (hold to arm, release to start; press to stop); on mobile, touch-and-hold to arm then release to start; tap/press to stop.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-after-stopping-the-timer-keep-the-final-time-visible-until-the-next-start-and-ensure-generating-a-new-scramble-is-available-without-breaking-timer-state-e-g-only-when-not-running",
-      "title": "After stopping the timer, keep the final time visible until the next start, and ensure generating a new scramble is available without breaking timer state (e.g., only when not running).",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-coherent-distinctive-visual-theme-colors-typography-spacing-and-component-styling-appropriate-for-a-speedcubing-timer-and-enforce-it-consistently-across-the-app-avoid-default-basic-styling",
-      "title": "Apply a coherent, distinctive visual theme (colors, typography, spacing, and component styling) appropriate for a speedcubing timer, and enforce it consistently across the app (avoid default/basic styling).",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Use the official WCA scramble generator to generate scrambles per event",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Support all WCA events and show the correct scramble for the selected event",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Display scramble images/visualizations for each generated scramble",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Implement a timer UI that works on both mobile and desktop",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Add touch-and-hold to start/stop on mobile and spacebar control on desktop",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "gameProjectType": "none",
-  "projectName": "WCA speedcubing timer with official WCA scrambles (all events), scramble images, and mobile/desktop controls",
+  "new_feature_requests": [],
+  "projectName": "Fix WCA inspection countdown progression and 8s/5s warnings; ensure start-on-release and +2/DNF timing rules",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

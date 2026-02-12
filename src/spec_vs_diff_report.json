@@ -1,68 +1,66 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T22:37:46.730Z",
-  "summary": "Implements a responsive timer screen with event selector, official cubing.js (CDN) scramble generation, a TwistyPlayer-based visualization panel, WCA-style space/touch hold controls, and a custom orange/amber theme. However, the event list is incomplete vs. “all official WCA events”, and visualization fallback/unsupported-event handling is not clearly implemented (it defaults to 3x3). Also includes Internet Identity/auth scaffolding that was explicitly a non-goal.",
+  "generatedAt": "2026-02-12T23:34:22.139Z",
+  "summary": "REQ-1 and REQ-2 appear implemented via a ref-driven RAF inspection countdown with threshold-crossing warning beeps and a UI \"5 sec\" indicator. REQ-3 and parts of REQ-4 cannot be fully verified from the provided diff excerpts because the relevant control/penalty logic is truncated.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Event selector includes all official WCA events (one entry per event), with English names, and drives scramble generation/visualization for the selected event.",
-      "reason": "The provided WCA_EVENTS list only contains a subset of official events (e.g., it includes 333, 222, 444... plus some BLD/FMC/OH, but does not show the full current WCA set). From the diff summary alone, it does not satisfy “all official WCA events”.",
+      "id": "REQ-3",
+      "requirement": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
+      "reason": "The diff excerpt for the control hook does not include the pointer/keyboard event handlers or the armed→running transition conditions, so start-on-release behavior for both pointer and Spacebar cannot be confirmed from the provided evidence.",
       "evidence": [
-        "frontend/src/lib/wcaEvents.ts",
-        "frontend/src/components/EventSelector.tsx"
+        "frontend/src/hooks/useWcaTimerControls.ts (truncated)"
       ]
     },
     {
       "id": "REQ-4",
-      "requirement": "If an event does not support a visualization, show a clear English fallback message (e.g., \"No visualization available for this event\").",
-      "reason": "ScrambleVisualizer always maps unknown/unsupported eventIds to a default puzzleName of '3x3x3' rather than detecting unsupported events and showing a fallback. The fallback message only appears on exceptions, not on unsupported events.",
+      "requirement": "Apply inspection penalty rules: start up to 2s after inspection hits 0.00 => +2; after that => DNF, and record/display accordingly.",
+      "reason": "The penalty assignment logic in startTimer is truncated right after the DNF branch (inspectionElapsed > 17000) and begins an incomplete conditional for the +2 case, so the exact +2 window and recorded outcome rules cannot be fully verified from the provided evidence.",
       "evidence": [
-        "frontend/src/components/ScrambleVisualizer.tsx"
+        "frontend/src/hooks/useWcaTimerControls.ts (truncated)",
+        "frontend/src/components/TimerDisplay.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Internet Identity / authenticated-vs-anonymous actor plumbing (InternetIdentityProvider usage and identity-aware useActor hook).",
-      "reason": "BuildRequest non-goals explicitly exclude implementing user accounts/auth flows/Internet Identity login UX; the timer app requirements are entirely frontend timer/scramble related. The diff adds/uses Internet Identity and actor fetching logic anyway.",
+      "description": "Session persistence via cookies (saving/loading event, scramble, solves).",
+      "reason": "Not requested by any requirement (REQ-1..REQ-4 focus only on inspection countdown, warnings, controls, and penalty rules).",
       "evidence": [
-        "frontend/src/main.tsx",
-        "frontend/src/hooks/useActor.ts",
-        "frontend/src/hooks/useInternetIdentity.ts"
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend-file-summaries.txt (frontend/src/lib/sessionCookie.ts)"
       ]
     },
     {
-      "description": "GitHub link in header pointing to cubing.js repository.",
-      "reason": "Not requested in any requirement or acceptance criteria.",
+      "description": "Scramble visualizer and CDN-based cubing.js TwistyPlayer integration and related build/config changes (removing cubing package, Vite/TS config updates, type declarations).",
+      "reason": "Not requested; also outside the scope of the inspection/countdown/control/penalty fixes.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/components/ScrambleVisualizer.tsx, frontend/package.json, frontend/vite.config.js, frontend/tsconfig.json, frontend/src/types/cubing.d.ts)"
+      ]
+    },
+    {
+      "description": "UI/theme styling changes including new timer-specific Tailwind color tokens and global orange/amber theme updates.",
+      "reason": "Not requested by REQ-1..REQ-4.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/index.css, frontend/tailwind.config.js)",
+        "frontend/src/components/TimerDisplay.tsx"
+      ]
+    },
+    {
+      "description": "Header/footer/attribution UI changes (e.g., GitHub link, icons).",
+      "reason": "Not requested by REQ-1..REQ-4.",
       "evidence": [
         "frontend/src/components/TimerScreen.tsx"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.64,
   "changed_files": [
-    "all_files_summary.json",
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/EventSelector.tsx",
-    "frontend/src/components/ScramblePanel.tsx",
-    "frontend/src/components/ScrambleVisualizer.tsx",
     "frontend/src/components/TimerDisplay.tsx",
     "frontend/src/components/TimerScreen.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useWcaScramble.ts",
     "frontend/src/hooks/useWcaTimerControls.ts",
-    "frontend/src/index.css",
-    "frontend/src/lib/wcaEvents.ts",
-    "frontend/src/main.tsx",
-    "frontend/src/types/cubing.d.ts",
-    "frontend/tailwind.config.js",
+    "frontend/src/lib/inspectionAudio.ts",
     "project_state.json"
   ]
 }
