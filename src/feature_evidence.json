@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-reset-the-inspection-countdown-back-to-15-00-seconds-immediately-after-every-solve-is-completed-i-e-when-the-timer-transitions-into-the-stopped-state-regardless-of-what-the-inspection-countdown-value-was-previously",
-      "featureTitle": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
+      "featureId": "feature-show-a-modal-login-popup-automatically-on-page-load-for-first-time-visitors-who-are-not-authenticated-the-popup-must-appear-only-once-per-browser-persist-a-flag-in-localstorage-and-it-must-include-a-clear-call-to-action-button-that-triggers-internet-identity-login-via-the-existing-useinternetidentity-login-function-must-be-invoked-by-a-user-click-not-automatically",
+      "featureTitle": "Show a modal login popup automatically on page load for first-time visitors who are not authenticated. The popup must appear only once per browser (persist a flag in localStorage), and it must include a clear call-to-action button that triggers Internet Identity login via the existing `useInternetIdentity().login()` function (must be invoked by a user click, not automatically).",
       "files": [
-        "frontend/src/hooks/useWcaTimerControls.ts"
+        "frontend/src/components/LoginModal.tsx",
+        "frontend/src/components/TimerScreen.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -15,15 +16,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-5"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-inspection-warning-state-is-also-reset-after-each-solve-completion-so-the-8-second-and-5-second-inspection-warnings-can-trigger-normally-on-the-next-inspection",
-      "featureTitle": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
+      "featureId": "feature-add-a-login-icon-button-to-the-header-in-frontend-src-components-timerscreen-tsx-that-opens-the-same-login-modal-later-on-demand-the-header-control-must-be-visible-and-usable-after-the-initial-popup-has-been-suppressed",
+      "featureTitle": "Add a login icon/button to the header in `frontend/src/components/TimerScreen.tsx` that opens the same login modal later on demand. The header control must be visible and usable after the initial popup has been suppressed.",
       "files": [
-        "frontend/src/hooks/useWcaTimerControls.ts"
+        "frontend/src/components/LoginModal.tsx",
+        "frontend/src/components/TimerScreen.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -33,7 +35,26 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-reusable-login-modal-component-new-file-that-encapsulates-the-modal-ui-and-uses-useinternetidentity-for-login-status-and-actions-and-integrate-it-into-timerscreen-for-both-first-visit-auto-open-behavior-and-header-triggered-open-behavior",
+      "featureTitle": "Create a reusable login modal component (new file) that encapsulates the modal UI and uses `useInternetIdentity` for login status and actions, and integrate it into `TimerScreen` for both first-visit auto-open behavior and header-triggered open behavior.",
+      "files": [
+        "frontend/src/components/LoginModal.tsx",
+        "frontend/src/components/TimerScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

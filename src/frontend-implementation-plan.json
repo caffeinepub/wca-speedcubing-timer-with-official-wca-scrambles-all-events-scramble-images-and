@@ -1,36 +1,69 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Reset inspection countdown and warnings after each solve",
+  "title": "Add first-visit Internet Identity login modal and header login control",
   "requirements": [
     {
-      "id": "REQ-5",
-      "summary": "Reset the inspection countdown state to 15.00s immediately when a solve completes (timer enters the \"stopped\" state), so the next inspection always starts from 15.00s.",
+      "id": "REQ-1",
+      "summary": "Auto-open a login modal on first page load for unauthenticated users, only once per browser via localStorage, with click-to-login using useInternetIdentity().login().",
       "acceptanceCriteria": [
-        "Given an inspection is started and the countdown reaches any value (e.g., 11 seconds remaining), when the user completes a solve (timer stops and a result is recorded), the internal inspection countdown state is reset to exactly 15,000ms.",
-        "After a solve completes, starting the next inspection always begins from 15.00 seconds and does not resume from the previous inspection’s remaining time.",
-        "This behavior works for both Spacebar and touch/pointer interactions."
+        "On first page load in a fresh browser profile (no localStorage flag set) and while the user is not authenticated, a modal login popup is visible without any user action.",
+        "The modal contains a button (e.g., \"Sign in\") that, when clicked, calls `login()` from `useInternetIdentity` (no automatic login invocation on mount).",
+        "After the user dismisses the modal or successfully completes login, the app stores a localStorage flag so the modal does not auto-open on subsequent visits/reloads in the same browser.",
+        "If the user is already authenticated (non-anonymous identity), the modal does not auto-open even on first visit."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useWcaTimerControls.ts",
+          "path": "frontend/src/components/TimerScreen.tsx",
           "operation": "modify",
-          "description": "Update the solve-completion logic (when transitioning into the \"stopped\" state) to immediately reset inspection countdown-related state back to 15,000ms (including any internal remaining-time tracking) so subsequent inspections always begin at 15.00s for both keyboard (Space) and pointer/touch flows."
+          "description": "Add first-visit gating logic that reads/writes a localStorage flag, checks authentication state via useInternetIdentity (without modifying the hook), and auto-opens/closes the shared LoginModal accordingly; ensure the modal is only opened after auth initialization to avoid flashing. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/LoginModal.tsx",
+          "operation": "create",
+          "description": "Create a reusable modal component that renders an accessible modal UI (focusable, dismissible) and includes a clear CTA button that invokes useInternetIdentity().login() strictly on user click; expose callbacks so TimerScreen can persist the localStorage \"seen\" flag on dismiss or successful authentication. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Reset inspection warning state after each solve so 8s and 5s warnings can trigger normally on the next inspection only.",
+      "id": "REQ-2",
+      "summary": "Add a header login icon/button in TimerScreen that opens the same login modal on demand.",
       "acceptanceCriteria": [
-        "After a solve completes, starting the next inspection can play the 8-second warning once and the 5-second warning once as the countdown crosses those thresholds, even if warnings were triggered during the previous inspection.",
-        "No inspection warning audio plays immediately upon solve completion; warnings only occur during a subsequent inspection countdown."
+        "The TimerScreen header includes a login icon/button that is accessible via keyboard and has an English accessible label (e.g., aria-label=\"Sign in\").",
+        "Clicking the header login icon/button opens the login modal.",
+        "The modal opened from the header provides the same sign-in action (calls `useInternetIdentity().login()` on button click)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useWcaTimerControls.ts",
+          "path": "frontend/src/components/TimerScreen.tsx",
           "operation": "modify",
-          "description": "Ensure that when a solve completes (timer enters \"stopped\"), the internal inspection warning flags/state are cleared (so 8s/5s warnings can fire again on the next inspection), without triggering any warning audio during the stop transition."
+          "description": "Add a keyboard-accessible header control (icon/button) with an English aria-label (e.g., \"Sign in\") that opens the shared LoginModal regardless of whether the first-visit modal was previously suppressed; ensure the control remains visible/usable after the localStorage flag is set. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/LoginModal.tsx",
+          "operation": "modify",
+          "description": "Ensure the modal supports being opened via external triggers (props-controlled open state) and provides the same sign-in button action that calls useInternetIdentity().login() on click. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Introduce a reusable LoginModal component and integrate it into TimerScreen with TimerScreen-controlled open/close and localStorage first-visit logic.",
+      "acceptanceCriteria": [
+        "A new component is introduced (e.g., `frontend/src/components/LoginModal.tsx` or similar) to avoid duplicating modal logic.",
+        "`TimerScreen` controls the open/close state and first-visit logic (localStorage flag) and passes props to the modal component.",
+        "All user-facing text in the modal is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/LoginModal.tsx",
+          "operation": "create",
+          "description": "Implement the reusable LoginModal with English copy, controlled open/close props, and internal useInternetIdentity integration for login action and authenticated-state detection; avoid any automatic login invocation and keep dismissal behavior explicit. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/TimerScreen.tsx",
+          "operation": "modify",
+          "description": "Wire the new LoginModal into TimerScreen (no duplicate modal logic): TimerScreen owns open state, passes handlers for dismiss/auth-success, and centralizes localStorage flag behavior; keep all edits outside frontend/src/components/ui per constraints. Verify the component's usage instructions before implementing."
         }
       ]
     }

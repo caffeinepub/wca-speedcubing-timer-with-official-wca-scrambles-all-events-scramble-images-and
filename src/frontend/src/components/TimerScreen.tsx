@@ -5,19 +5,28 @@ import { ScrambleVisualizer } from './ScrambleVisualizer';
 import { TimerDisplay } from './TimerDisplay';
 import { SolveHistory } from './SolveHistory';
 import { SessionStats } from './SessionStats';
+import { LoginModal } from './LoginModal';
 import { useWcaScramble } from '../hooks/useWcaScramble';
 import { useWcaTimerControls } from '../hooks/useWcaTimerControls';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { SolveEntry } from '../types/solves';
 import { computeSessionStats } from '../lib/sessionStats';
 import { saveSessionData, loadSessionData } from '../lib/sessionCookie';
 import { SiGithub } from 'react-icons/si';
-import { Heart } from 'lucide-react';
+import { Heart, LogIn } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const FIRST_VISIT_KEY = 'wca-timer-first-visit-seen';
 
 export function TimerScreen() {
   const [selectedEvent, setSelectedEvent] = useState('333');
   const [solves, setSolves] = useState<SolveEntry[]>([]);
   const [initialScramble, setInitialScramble] = useState<string | undefined>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  const { identity, isInitializing } = useInternetIdentity();
+  const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
   // Load session data on mount
   useEffect(() => {
@@ -29,6 +38,35 @@ export function TimerScreen() {
     }
     setIsInitialized(true);
   }, []);
+
+  // Auto-open login modal on first visit for unauthenticated users
+  useEffect(() => {
+    // Wait for auth initialization to complete
+    if (isInitializing) return;
+
+    // Check if user is authenticated
+    if (isAuthenticated) return;
+
+    // Check if first-visit modal has been shown before
+    const hasSeenModal = localStorage.getItem(FIRST_VISIT_KEY);
+    if (!hasSeenModal) {
+      setLoginModalOpen(true);
+    }
+  }, [isInitializing, isAuthenticated]);
+
+  // Handle modal close or successful auth
+  const handleModalClose = (open: boolean) => {
+    setLoginModalOpen(open);
+    if (!open) {
+      // Mark as seen when modal is dismissed
+      localStorage.setItem(FIRST_VISIT_KEY, 'true');
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    // Mark as seen on successful authentication
+    localStorage.setItem(FIRST_VISIT_KEY, 'true');
+  };
 
   const { scramble, isGenerating, generateScramble, setScramble } = useWcaScramble(
     selectedEvent,
@@ -99,16 +137,36 @@ export function TimerScreen() {
               <p className="text-xs text-muted-foreground">Official Scrambles</p>
             </div>
           </div>
-          <a
-            href="https://github.com/cubing/cubing.js"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <SiGithub className="w-5 h-5" />
-          </a>
+          <div className="flex items-center gap-3">
+            {!isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLoginModalOpen(true)}
+                aria-label="Sign in"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <LogIn className="w-5 h-5" />
+              </Button>
+            )}
+            <a
+              href="https://github.com/cubing/cubing.js"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <SiGithub className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </header>
+
+      {/* Login Modal */}
+      <LoginModal
+        open={loginModalOpen}
+        onOpenChange={handleModalClose}
+        onAuthSuccess={handleAuthSuccess}
+      />
 
       {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-6 flex flex-col gap-6">

@@ -1,28 +1,36 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "App needs authentication UX: show an OTPless login popup on first visit (on page load) and provide a header login icon for users to log in later.",
   "architectural_notes": [
-    "Inspection timer state must be reset to 15s on solve completion, independent of prior pause/stop state."
+    "Use OTPless authentication widget for email login.",
+    "Display login UI as a modal/popup on initial page load for first-time visitors; subsequent visits rely on session/cached state.",
+    "Provide a header login icon to manually trigger the login modal later."
   ],
-  "known_issues": [
-    "Inspection timer does not reset after a solve if the user stops inspection mid-countdown; it should reset to 15s after each solve."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-reset-the-inspection-countdown-back-to-15-00-seconds-immediately-after-every-solve-is-completed-i-e-when-the-timer-transitions-into-the-stopped-state-regardless-of-what-the-inspection-countdown-value-was-previously",
-      "title": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
+      "id": "feature-show-a-modal-login-popup-automatically-on-page-load-for-first-time-visitors-who-are-not-authenticated-the-popup-must-appear-only-once-per-browser-persist-a-flag-in-localstorage-and-it-must-include-a-clear-call-to-action-button-that-triggers-internet-identity-login-via-the-existing-useinternetidentity-login-function-must-be-invoked-by-a-user-click-not-automatically",
+      "title": "Show a modal login popup automatically on page load for first-time visitors who are not authenticated. The popup must appear only once per browser (persist a flag in localStorage), and it must include a clear call-to-action button that triggers Internet Identity login via the existing `useInternetIdentity().login()` function (must be invoked by a user click, not automatically).",
       "reqIds": [
-        "REQ-5"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-the-inspection-warning-state-is-also-reset-after-each-solve-completion-so-the-8-second-and-5-second-inspection-warnings-can-trigger-normally-on-the-next-inspection",
-      "title": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
+      "id": "feature-add-a-login-icon-button-to-the-header-in-frontend-src-components-timerscreen-tsx-that-opens-the-same-login-modal-later-on-demand-the-header-control-must-be-visible-and-usable-after-the-initial-popup-has-been-suppressed",
+      "title": "Add a login icon/button to the header in `frontend/src/components/TimerScreen.tsx` that opens the same login modal later on demand. The header control must be visible and usable after the initial popup has been suppressed.",
       "reqIds": [
-        "REQ-6"
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-reusable-login-modal-component-new-file-that-encapsulates-the-modal-ui-and-uses-useinternetidentity-for-login-status-and-actions-and-integrate-it-into-timerscreen-for-both-first-visit-auto-open-behavior-and-header-triggered-open-behavior",
+      "title": "Create a reusable login modal component (new file) that encapsulates the modal UI and uses `useInternetIdentity` for login status and actions, and integrate it into `TimerScreen` for both first-visit auto-open behavior and header-triggered open behavior.",
+      "reqIds": [
+        "REQ-3"
       ],
       "version": 1
     }
@@ -30,12 +38,18 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Reset inspection timer to 15 seconds after every solve event (even if inspection was stopped mid-countdown)",
+      "summary": "Show OTPless login popup on first-time visit (display on page load)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add login icon in header to open OTPless login later",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Reset inspection timer to 15 seconds after every solve",
+  "projectName": "Add first-visit login popup and header login icon (Internet Identity)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

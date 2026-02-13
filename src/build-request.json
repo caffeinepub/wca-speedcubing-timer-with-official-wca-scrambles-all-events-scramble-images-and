@@ -1,54 +1,77 @@
 {
   "kind": "build_request",
-  "title": "Reset inspection timer to 15 seconds after every solve",
+  "title": "Add first-visit login popup and header login icon (Internet Identity)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-5",
-      "text": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
+      "id": "REQ-1",
+      "text": "Show a modal login popup automatically on page load for first-time visitors who are not authenticated. The popup must appear only once per browser (persist a flag in localStorage), and it must include a clear call-to-action button that triggers Internet Identity login via the existing `useInternetIdentity().login()` function (must be invoked by a user click, not automatically).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "Starts from 15 if stopeed at 11 se and it restarts from  15 once solve is done.",
-          "After solve event",
-          "resetting the inspection timer back to 15 sec"
+          "When user visit the popup should be visible",
+          "2. On page load",
+          "3. First time",
+          "1. Yes"
         ]
       },
       "acceptanceCriteria": [
-        "Given an inspection is started and the countdown reaches any value (e.g., 11 seconds remaining), when the user completes a solve (timer stops and a result is recorded), the internal inspection countdown state is reset to exactly 15,000ms.",
-        "After a solve completes, starting the next inspection always begins from 15.00 seconds and does not resume from the previous inspection’s remaining time.",
-        "This behavior works for both Spacebar and touch/pointer interactions."
+        "On first page load in a fresh browser profile (no localStorage flag set) and while the user is not authenticated, a modal login popup is visible without any user action.",
+        "The modal contains a button (e.g., \"Sign in\") that, when clicked, calls `login()` from `useInternetIdentity` (no automatic login invocation on mount).",
+        "After the user dismisses the modal or successfully completes login, the app stores a localStorage flag so the modal does not auto-open on subsequent visits/reloads in the same browser.",
+        "If the user is already authenticated (non-anonymous identity), the modal does not auto-open even on first visit."
       ]
     },
     {
-      "id": "REQ-6",
-      "text": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
+      "id": "REQ-2",
+      "text": "Add a login icon/button to the header in `frontend/src/components/TimerScreen.tsx` that opens the same login modal later on demand. The header control must be visible and usable after the initial popup has been suppressed.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "After solve event"
+          "add login icon on header to login later"
         ]
       },
       "acceptanceCriteria": [
-        "After a solve completes, starting the next inspection can play the 8-second warning once and the 5-second warning once as the countdown crosses those thresholds, even if warnings were triggered during the previous inspection.",
-        "No inspection warning audio plays immediately upon solve completion; warnings only occur during a subsequent inspection countdown."
+        "The TimerScreen header includes a login icon/button that is accessible via keyboard and has an English accessible label (e.g., aria-label=\"Sign in\").",
+        "Clicking the header login icon/button opens the login modal.",
+        "The modal opened from the header provides the same sign-in action (calls `useInternetIdentity().login()` on button click)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Create a reusable login modal component (new file) that encapsulates the modal UI and uses `useInternetIdentity` for login status and actions, and integrate it into `TimerScreen` for both first-visit auto-open behavior and header-triggered open behavior.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "When user visit the popup should be visible",
+          "add login icon on header to login later"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new component is introduced (e.g., `frontend/src/components/LoginModal.tsx` or similar) to avoid duplicating modal logic.",
+        "`TimerScreen` controls the open/close state and first-visit logic (localStorage flag) and passes props to the modal component.",
+        "All user-facing text in the modal is in English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files in frontend/src/components/ui (read-only).",
-    "Do not edit frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts (immutable paths).",
-    "Keep all backend logic in the single Motoko actor (backend/main.mo); no backend changes are required for this request."
+    "Do not edit files under `frontend/src/components/ui` (compose existing UI components instead).",
+    "Do not edit immutable hook files (e.g., `frontend/src/hooks/useInternetIdentity.ts` and `frontend/src/hooks/useActor.ts`).",
+    "Backend remains a single Motoko actor; no backend changes are required for this authentication UI request."
   ],
   "nonGoals": [
-    "Do not change inspection penalty rules (+2/DNF thresholds) beyond what already exists.",
-    "Do not change solve history, session stats, scramble generation, or event selection behavior."
+    "Integrating OTPless or any third-party authentication provider (Internet Identity is the only supported auth mechanism).",
+    "Adding backend authorization rules, roles, or authenticated data storage.",
+    "Implementing logout UI or account/profile management (unless required to complete the login popup/icon behavior)."
   ],
   "imageRequirements": {
     "required": [],

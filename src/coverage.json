@@ -1,35 +1,52 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T23:42:05.903Z",
+  "generatedAt": "2026-02-13T00:30:08.277Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-5",
-        "summary": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
+        "id": "REQ-1",
+        "summary": "Show a modal login popup automatically on page load for first-time visitors who are not authenticated. The popup must appear only once per browser (persist a flag in localStorage), and it must include a clear call-to-action button that triggers Internet Identity login via the existing `useInternetIdentity().login()` function (must be invoked by a user click, not automatically).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts"
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/LoginModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts"
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/LoginModal.tsx"
         ]
       },
       {
-        "id": "REQ-6",
-        "summary": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
+        "id": "REQ-2",
+        "summary": "Add a login icon/button to the header in `frontend/src/components/TimerScreen.tsx` that opens the same login modal later on demand. The header control must be visible and usable after the initial popup has been suppressed.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts"
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/LoginModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts"
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/LoginModal.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Create a reusable login modal component (new file) that encapsulates the modal UI and uses `useInternetIdentity` for login status and actions, and integrate it into `TimerScreen` for both first-visit auto-open behavior and header-triggered open behavior.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/LoginModal.tsx",
+          "frontend/src/components/TimerScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/LoginModal.tsx",
+          "frontend/src/components/TimerScreen.tsx"
         ]
       }
     ]
@@ -39,7 +56,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useWcaTimerControls.ts",
+    "frontend/src/components/LoginModal.tsx",
+    "frontend/src/components/TimerScreen.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
