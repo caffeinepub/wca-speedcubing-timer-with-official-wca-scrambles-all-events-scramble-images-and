@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Prompt unauthenticated first-time visitors to sign in with Internet Identity via an auto-shown modal, while also providing a header login control to open the same modal later.
+**Goal:** Replace the existing Internet Identity login flow with a custom email/password signup + login system backed by the Motoko canister, including session tokens so users stay logged in across refreshes.
 
 **Planned changes:**
-- Add first-visit logic in `TimerScreen` to automatically open a login modal on page load when the user is not authenticated and no localStorage “shown” flag is set.
-- Persist a localStorage flag after the modal is dismissed or after successful login so the modal does not auto-open again in the same browser.
-- Add an accessible login icon/button in the `TimerScreen` header that opens the same login modal on demand.
-- Create a reusable `LoginModal` component that encapsulates modal UI and uses `useInternetIdentity` for login status/actions, with an English CTA button that calls `useInternetIdentity().login()` only on user click.
+- Add Motoko backend support for email/password `signup` and `login`, storing per-user salt + password hash (no plaintext passwords) and treating emails case-insensitively.
+- Add backend session token management: issue token on login, validate token to fetch current user (email + user id), and logout/invalidate token; persist backend state across upgrades (adding migration only if needed).
+- Update `frontend/src/components/LoginModal.tsx` to an English email/password modal with both “Sign up” and “Log in”, including basic form validation.
+- Integrate the updated modal into `frontend/src/components/TimerScreen.tsx` to preserve current behavior: auto-open on first visit for logged-out users and open via the existing header login icon.
+- Implement a new frontend auth hook/provider that stores the session token locally, restores auth on refresh by validating the token with the backend, and exposes `signup`, `login`, `logout`, `isAuthenticated`, and current user info without relying on Internet Identity for app logic.
 
-**User-visible outcome:** On first visit while not signed in, users see a login popup with a “Sign in” button; later, they can open the same popup anytime via a header login icon/button.
+**User-visible outcome:** Users can sign up and log in with email/password, remain logged in across page refreshes via a session token, and log out; the app no longer prompts for Internet Identity.

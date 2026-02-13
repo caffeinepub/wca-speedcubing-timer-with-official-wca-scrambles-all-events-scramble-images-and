@@ -1,36 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "App needs authentication UX: show an OTPless login popup on first visit (on page load) and provide a header login icon for users to log in later.",
+  "summary": "Build a custom authentication system using email + password with signup and login, storing user accounts securely in a Motoko backend canister (replacing Internet Identity / OTPless).",
   "architectural_notes": [
-    "Use OTPless authentication widget for email login.",
-    "Display login UI as a modal/popup on initial page load for first-time visitors; subsequent visits rely on session/cached state.",
-    "Provide a header login icon to manually trigger the login modal later."
+    "Use Motoko backend canister to store user accounts with securely hashed passwords (no plaintext).",
+    "Replace existing Internet Identity/OTPless login UI flow with custom email+password signup/login screens."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Previous attempt to implement email+password signup/login failed to build/deploy; needs retry."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-show-a-modal-login-popup-automatically-on-page-load-for-first-time-visitors-who-are-not-authenticated-the-popup-must-appear-only-once-per-browser-persist-a-flag-in-localstorage-and-it-must-include-a-clear-call-to-action-button-that-triggers-internet-identity-login-via-the-existing-useinternetidentity-login-function-must-be-invoked-by-a-user-click-not-automatically",
-      "title": "Show a modal login popup automatically on page load for first-time visitors who are not authenticated. The popup must appear only once per browser (persist a flag in localStorage), and it must include a clear call-to-action button that triggers Internet Identity login via the existing `useInternetIdentity().login()` function (must be invoked by a user click, not automatically).",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-login-icon-button-to-the-header-in-frontend-src-components-timerscreen-tsx-that-opens-the-same-login-modal-later-on-demand-the-header-control-must-be-visible-and-usable-after-the-initial-popup-has-been-suppressed",
-      "title": "Add a login icon/button to the header in `frontend/src/components/TimerScreen.tsx` that opens the same login modal later on demand. The header control must be visible and usable after the initial popup has been suppressed.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-reusable-login-modal-component-new-file-that-encapsulates-the-modal-ui-and-uses-useinternetidentity-for-login-status-and-actions-and-integrate-it-into-timerscreen-for-both-first-visit-auto-open-behavior-and-header-triggered-open-behavior",
-      "title": "Create a reusable login modal component (new file) that encapsulates the modal UI and uses `useInternetIdentity` for login status and actions, and integrate it into `TimerScreen` for both first-visit auto-open behavior and header-triggered open behavior.",
+      "id": "feature-replace-the-existing-internet-identity-based-login-modal-ui-with-an-email-password-authentication-modal-that-supports-both-signup-and-login-and-integrate-it-into-frontend-src-components-timerscreen-tsx-so-it-still-a-auto-opens-on-first-visit-for-unauthenticated-users-and-b-can-be-opened-via-the-existing-header-login-icon",
+      "title": "Replace the existing Internet Identity-based login modal UI with an email/password authentication modal that supports both signup and login, and integrate it into `frontend/src/components/TimerScreen.tsx` so it still (a) auto-opens on first visit for unauthenticated users and (b) can be opened via the existing header login icon.",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-new-frontend-authentication-state-layer-new-hook-provider-for-email-password-auth-that-stores-the-session-token-locally-exposes-signup-login-and-logout-actions-and-exposes-isauthenticated-current-user-info-to-the-ui-without-relying-on-useinternetidentity-for-application-logic",
+      "title": "Implement a new frontend authentication state layer (new hook/provider) for email/password auth that stores the session token locally, exposes `signup`, `login`, and `logout` actions, and exposes `isAuthenticated` + current user info to the UI without relying on `useInternetIdentity` for application logic.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -38,18 +31,28 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Show OTPless login popup on first-time visit (display on page load)",
+      "summary": "Implement custom email+password authentication: user signup and future login, with accounts stored securely (hashed passwords) in Motoko backend canister; update UI to use this instead of Internet Identity/OTPless.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Add login icon in header to open OTPless login later",
-      "reqIds": [],
+      "summary": "Implement a custom email + password authentication system in the Motoko backend canister, supporting user signup and future login with securely stored credentials (store a per-user salt + password hash; never store plaintext passwords).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add backend session management for the custom auth system so the frontend can remain logged in across page refreshes using a backend-issued session token, with methods to get the current authenticated user from a token and to log out (invalidate the token).",
+      "reqIds": [
+        "REQ-2"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Add first-visit login popup and header login icon (Internet Identity)",
+  "projectName": "Replace Internet Identity flow with custom email/password signup + login (Motoko-backed)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,69 +1,51 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add first-visit Internet Identity login modal and header login control",
+  "title": "Email/password auth modal + frontend auth state (session-token based)",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Auto-open a login modal on first page load for unauthenticated users, only once per browser via localStorage, with click-to-login using useInternetIdentity().login().",
-      "acceptanceCriteria": [
-        "On first page load in a fresh browser profile (no localStorage flag set) and while the user is not authenticated, a modal login popup is visible without any user action.",
-        "The modal contains a button (e.g., \"Sign in\") that, when clicked, calls `login()` from `useInternetIdentity` (no automatic login invocation on mount).",
-        "After the user dismisses the modal or successfully completes login, the app stores a localStorage flag so the modal does not auto-open on subsequent visits/reloads in the same browser.",
-        "If the user is already authenticated (non-anonymous identity), the modal does not auto-open even on first visit."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "modify",
-          "description": "Add first-visit gating logic that reads/writes a localStorage flag, checks authentication state via useInternetIdentity (without modifying the hook), and auto-opens/closes the shared LoginModal accordingly; ensure the modal is only opened after auth initialization to avoid flashing. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/LoginModal.tsx",
-          "operation": "create",
-          "description": "Create a reusable modal component that renders an accessible modal UI (focusable, dismissible) and includes a clear CTA button that invokes useInternetIdentity().login() strictly on user click; expose callbacks so TimerScreen can persist the localStorage \"seen\" flag on dismiss or successful authentication. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Add a header login icon/button in TimerScreen that opens the same login modal on demand.",
-      "acceptanceCriteria": [
-        "The TimerScreen header includes a login icon/button that is accessible via keyboard and has an English accessible label (e.g., aria-label=\"Sign in\").",
-        "Clicking the header login icon/button opens the login modal.",
-        "The modal opened from the header provides the same sign-in action (calls `useInternetIdentity().login()` on button click)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "modify",
-          "description": "Add a keyboard-accessible header control (icon/button) with an English aria-label (e.g., \"Sign in\") that opens the shared LoginModal regardless of whether the first-visit modal was previously suppressed; ensure the control remains visible/usable after the localStorage flag is set. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/LoginModal.tsx",
-          "operation": "modify",
-          "description": "Ensure the modal supports being opened via external triggers (props-controlled open state) and provides the same sign-in button action that calls useInternetIdentity().login() on click. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
       "id": "REQ-3",
-      "summary": "Introduce a reusable LoginModal component and integrate it into TimerScreen with TimerScreen-controlled open/close and localStorage first-visit logic.",
+      "summary": "Replace the Internet Identity login modal with an email/password modal (signup + login) and integrate it into TimerScreen first-visit and header-icon flows.",
       "acceptanceCriteria": [
-        "A new component is introduced (e.g., `frontend/src/components/LoginModal.tsx` or similar) to avoid duplicating modal logic.",
-        "`TimerScreen` controls the open/close state and first-visit logic (localStorage flag) and passes props to the modal component.",
-        "All user-facing text in the modal is in English."
+        "`frontend/src/components/LoginModal.tsx` no longer prompts for Internet Identity and instead provides email + password inputs with clear actions for “Sign up” and “Log in”.",
+        "The first-visit behavior remains: on a fresh browser, unauthenticated users see the modal automatically once; dismissing it sets the existing localStorage flag (`wca-timer-first-visit-seen`).",
+        "The header login icon in `TimerScreen` opens the same modal on demand when the user is logged out.",
+        "All user-facing text in the modal is in English.",
+        "Form validation is present (e.g., required fields; basic email format; password minimum length)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/LoginModal.tsx",
-          "operation": "create",
-          "description": "Implement the reusable LoginModal with English copy, controlled open/close props, and internal useInternetIdentity integration for login action and authenticated-state detection; avoid any automatic login invocation and keep dismissal behavior explicit. Verify the component's usage instructions before implementing."
+          "operation": "modify",
+          "description": "Replace Internet Identity UI with an email/password form supporting both Sign up and Log in, wired to the new email/password auth hook actions; add client-side validation (required, basic email format, minimum password length), loading/disabled states, and English-only copy. Keep the Dialog + Button patterns from shadcn-ui; verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/components/TimerScreen.tsx",
           "operation": "modify",
-          "description": "Wire the new LoginModal into TimerScreen (no duplicate modal logic): TimerScreen owns open state, passes handlers for dismiss/auth-success, and centralizes localStorage flag behavior; keep all edits outside frontend/src/components/ui per constraints. Verify the component's usage instructions before implementing."
+          "description": "Replace Internet Identity-derived authentication checks with the new email/password auth state (`isAuthenticated`, `isInitializing/loading` as applicable) while preserving: (1) first-visit auto-open behavior using `wca-timer-first-visit-seen`, and (2) header login icon opening the same LoginModal when logged out."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add a new frontend auth provider/hook for email/password auth that persists a backend-issued session token and restores auth state on refresh without using useInternetIdentity for app logic.",
+      "acceptanceCriteria": [
+        "A new auth hook/provider exists (new file(s)) that manages: current user (or null), auth status, loading/error states, and actions for signup/login/logout.",
+        "On successful login/signup, the session token is persisted in the browser (e.g., localStorage) and the app becomes authenticated without requiring Internet Identity.",
+        "On app load/refresh, if a token is present, the frontend attempts to validate it via the backend and restores authenticated state.",
+        "Logout clears the stored token and returns the UI to logged-out state.",
+        "No changes are requested to immutable files (`frontend/src/main.tsx`, `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`); the new auth layer is used by app components instead."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "operation": "create",
+          "description": "Create a React context/provider + hook that manages email/password authentication state: `user` (at minimum: email and user id), `isAuthenticated`, `isLoading`/`isRestoringSession`, `error`, and actions `signup`, `login`, `logout`. Persist the session token to localStorage and, on app load, if a token exists, call backend capability to validate it and restore user state. Use `useActor` to obtain an actor for calling backend capabilities (do not modify `useActor`)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap the existing app content (TimerScreen) with the new EmailPasswordAuthProvider so that authentication state and actions are available to UI components without relying on Internet Identity for application logic."
         }
       ]
     }

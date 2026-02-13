@@ -1,9 +1,9 @@
 {
-  "frontend/src/App.tsx": "Main application component that wraps TimerScreen with ThemeProvider for dark mode support.",
+  "frontend/src/App.tsx": "Main application component wrapping TimerScreen with ThemeProvider and EmailPasswordAuthProvider for authentication state management.",
   "frontend/src/lib/wcaEvents.ts": "Defines all official WCA events with their IDs, display names, and scramble event mappings.",
   "frontend/src/hooks/useWcaScramble.ts": "Scramble generation hook extended to support initial scramble restoration from cookies while maintaining CDN-based generation.",
   "frontend/src/hooks/useWcaTimerControls.ts": "Extended timer state machine with robust inspection countdown using RAF driven by refs, threshold-crossing warning logic, start-on-release controls for both keyboard and pointer, proper inspection penalty timing (0-2s = +2, >2s = DNF), and automatic inspection state reset (countdown and warnings) after each solve completes.",
-  "frontend/src/components/TimerScreen.tsx": "Main screen orchestrating WCA timer with inspection, solve recording, auto-scramble refresh, session stats, solve history, cookie persistence, first-visit login modal logic using localStorage flag, and header login icon for unauthenticated users.",
+  "frontend/src/components/TimerScreen.tsx": "Main timer screen updated to use email/password authentication instead of Internet Identity, with login/logout buttons in header and first-visit modal logic.",
   "frontend/src/components/EventSelector.tsx": "Dropdown selector component for choosing WCA events, disabled during active solves.",
   "frontend/src/components/ScramblePanel.tsx": "Card component displaying the current scramble text with a refresh button to generate new scrambles.",
   "frontend/src/components/ScrambleVisualizer.tsx": "Component that renders 2D puzzle visualizations using cubing.js TwistyPlayer loaded from CDN for better build compatibility.",
@@ -21,5 +21,6 @@
   "frontend/src/lib/sessionCookie.ts": "Cookie persistence utilities to save and load session data (event, scramble, solves) with far-future expiration.",
   "frontend/src/components/SolveHistory.tsx": "Displays solve history in a scrollable grid with max 5 items per row, showing solve numbers and results with DNF highlighting.",
   "frontend/src/components/SessionStats.tsx": "Displays session statistics (Current, Best, ao5, ao12, mo3) in a responsive grid layout.",
-  "frontend/src/components/LoginModal.tsx": "Reusable modal component that displays Internet Identity sign-in UI with a button that calls useInternetIdentity().login() on click, automatically closing on successful authentication."
+  "frontend/src/components/LoginModal.tsx": "Modal dialog component with email/password form supporting both signup and login modes, with validation, error handling, and mode switching.",
+  "frontend/src/hooks/useEmailPasswordAuth.tsx": "React context provider and hook for email/password authentication with signup, login, logout, and session restoration using localStorage-persisted tokens validated against backend."
 }

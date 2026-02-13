@@ -1,24 +1,69 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-13T00:30:08.274Z",
-  "summary": "Login modal component was added and TimerScreen now contains first-visit auto-open logic gated by auth initialization and a localStorage flag. The modal’s sign-in button calls useInternetIdentity().login() on user click and closes on successful login. However, the diff excerpt does not provide concrete evidence that the required header login icon/button (with keyboard accessibility and an English aria-label) was implemented in TimerScreen.",
+  "generatedAt": "2026-02-13T00:46:22.724Z",
+  "summary": "Frontend work adds an email/password auth provider, updates LoginModal UI to email/password with validation, and updates TimerScreen to use the new auth state and preserve first-visit modal behavior. However, the backend changes do not implement any of the required Motoko email/password auth or session methods. Additionally, an immutable file (`frontend/src/hooks/useActor.ts`) was modified, and several unrelated features/utilities were added/changed that are not part of the BuildRequest.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Add a login icon/button to the header in `frontend/src/components/TimerScreen.tsx` that opens the same login modal later on demand, accessible via keyboard with an English accessible label (e.g., aria-label=\"Sign in\").",
-      "reason": "TimerScreen.tsx is truncated and the provided snippet does not show any header UI or a login icon/button with an aria-label and click handler to open the modal. Without seeing that part of the file, implementation cannot be verified from the diff summary.",
+      "id": "REQ-1",
+      "requirement": "Implement Motoko backend email+password signup/login with per-user salt+password hash (no plaintext), case-insensitive email normalization, clear Ok/Err results, and upgrade-stable persistence.",
+      "reason": "The modified `backend/main.mo` only contains user profile + access control logic and exposes no `signup` or `login` methods, no password hashing/salting storage, no email normalization, and no stable storage/migration implementation is shown.",
       "evidence": [
-        "frontend/src/components/TimerScreen.tsx (truncated snippet does not include header rendering / login button)"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Implement backend session management: issue unique session tokens on login, validate token to return user (email + user id), and logout/invalidate tokens; invalid/expired tokens should not authenticate.",
+      "reason": "Frontend calls `(actor as any).validateSession(...)` and expects `sessionToken` from `login/signup`, but the backend diff shows no `validateSession`, no token issuance, and no logout/invalidate method.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useEmailPasswordAuth.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Do not modify immutable files (`frontend/src/hooks/useActor.ts`, `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`); use the new auth layer via app components instead.",
+      "reason": "`frontend/src/hooks/useActor.ts` was modified despite being explicitly listed as immutable in the BuildRequest constraints.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.62,
+  "hallucinated_features": [
+    {
+      "description": "Added URL parameter/sessionStorage utilities (including hash-query parsing and parameter persistence/clearing), and integrated a secret parameter lookup in `useActor`.",
+      "reason": "The BuildRequest is focused on replacing Internet Identity with custom email/password auth; it does not request new URL parameter utilities or secret/admin-token URL handling.",
+      "evidence": [
+        "frontend/src/utils/urlParams.ts",
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "Modified `useActor` behavior around identity-based actor creation and added access-control initialization using a URL-provided secret token.",
+      "reason": "Not requested by the BuildRequest and also violates the constraint that `frontend/src/hooks/useActor.ts` must not be modified.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "Backend change focuses on user profile storage and access control mixins rather than implementing custom email/password authentication and sessions.",
+      "reason": "The requested backend work is specific to email/password auth + sessions; the diff shows unrelated profile/access control logic without the required auth endpoints.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.78,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
     "frontend/src/components/LoginModal.tsx",
     "frontend/src/components/TimerScreen.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useEmailPasswordAuth.tsx",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

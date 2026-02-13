@@ -8,12 +8,12 @@ import { SessionStats } from './SessionStats';
 import { LoginModal } from './LoginModal';
 import { useWcaScramble } from '../hooks/useWcaScramble';
 import { useWcaTimerControls } from '../hooks/useWcaTimerControls';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useEmailPasswordAuth } from '../hooks/useEmailPasswordAuth';
 import { SolveEntry } from '../types/solves';
 import { computeSessionStats } from '../lib/sessionStats';
 import { saveSessionData, loadSessionData } from '../lib/sessionCookie';
 import { SiGithub } from 'react-icons/si';
-import { Heart, LogIn } from 'lucide-react';
+import { Heart, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const FIRST_VISIT_KEY = 'wca-timer-first-visit-seen';
@@ -25,8 +25,7 @@ export function TimerScreen() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
-  const { identity, isInitializing } = useInternetIdentity();
-  const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
+  const { isAuthenticated, isRestoringSession, logout, user } = useEmailPasswordAuth();
 
   // Load session data on mount
   useEffect(() => {
@@ -41,8 +40,8 @@ export function TimerScreen() {
 
   // Auto-open login modal on first visit for unauthenticated users
   useEffect(() => {
-    // Wait for auth initialization to complete
-    if (isInitializing) return;
+    // Wait for session restoration to complete
+    if (isRestoringSession) return;
 
     // Check if user is authenticated
     if (isAuthenticated) return;
@@ -52,7 +51,7 @@ export function TimerScreen() {
     if (!hasSeenModal) {
       setLoginModalOpen(true);
     }
-  }, [isInitializing, isAuthenticated]);
+  }, [isRestoringSession, isAuthenticated]);
 
   // Handle modal close or successful auth
   const handleModalClose = (open: boolean) => {
@@ -66,6 +65,12 @@ export function TimerScreen() {
   const handleAuthSuccess = () => {
     // Mark as seen on successful authentication
     localStorage.setItem(FIRST_VISIT_KEY, 'true');
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    // Optionally clear local session data on logout
+    // setSolves([]);
   };
 
   const { scramble, isGenerating, generateScramble, setScramble } = useWcaScramble(
@@ -138,7 +143,18 @@ export function TimerScreen() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {!isAuthenticated && (
+            {isAuthenticated ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Sign out"
+                className="text-muted-foreground hover:text-foreground"
+                title={user?.email || 'Sign out'}
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
+            ) : (
               <Button
                 variant="ghost"
                 size="icon"
