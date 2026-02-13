@@ -1,27 +1,24 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project now includes Internet Identity-based auth with plans for admin-only user management, plus email/password signup+signin via popup, and migration to a custom domain (mcubes.net) with ability to change domains in the future (via alternative origins).",
-  "architectural_notes": [
-    "Internet Identity cannot hide the origin/domain in the login popup; use a custom domain and/or alternative origins for migrations.",
-    "Admin identification must be based on an Internet Identity principal (email alone is not sufficient)."
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [
-    "Signup popup error: \"actor.signup is not a function\" during account creation / email auth; users unable to sign in."
+    "Account creation/signup attempt results in nothing happening (no error shown)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-ensure-the-internet-identity-login-flow-uses-mcubes-net-as-the-origin-shown-to-users-instead-of-caffeine-xyz-by-updating-the-frontend-configuration-used-by-useinternetidentity-derivation-origin-and-any-related-deployment-environment-configuration",
-      "title": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
+      "id": "feature-update-the-react-email-password-auth-hook-to-match-the-backend-s-actual-return-types-for-signup-login-validatesession-and-logout-and-ensure-all-failures-surface-a-user-visible-error-in-the-login-signup-modal-no-silent-failures",
+      "title": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-support-for-changing-the-app-domain-in-the-future-while-preserving-internet-identity-principals-by-configuring-internet-identity-alternative-origins-and-wiring-the-chosen-derivation-origin-through-the-existing-frontend-config-mechanism-used-by-loadconfig-config-ii-derivation-origin",
-      "title": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
+      "id": "feature-regenerate-update-the-frontend-backend-actor-type-declarations-so-the-compiled-frontend-actor-type-includes-the-newly-supported-signup-login-validatesession-and-logout-methods-eliminating-runtime-mismatches-between-declared-and-deployed-canister-interfaces",
+      "title": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
       "reqIds": [
         "REQ-3"
       ],
@@ -31,50 +28,14 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Treat the Internet Identity user (principal) associated with midhun.speedcuber@gmail.com as the admin (admin principal to be provided after login)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Admin dashboard for managing non-admin users after login: edit user profile data (incl. app-level password), block/unblock, delete, and reset session",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Implement email+password signup and signin flow inside a popup (app-level auth)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Fix signup/signin errors: \"actor.signup is not a function\" and inability to sign in from the signup popup",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Use mcubes.net as the custom domain for the app (so Internet Identity shows mcubes.net instead of the prior domain)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Support changing the app domain in the future while preserving Internet Identity principals via alternative origins configuration",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Implement Motoko backend support for email+password authentication so the frontend calls `(actor as any).signup`, `(actor as any).login`, `(actor as any).validateSession`, and `(actor as any).logout` do not throw “is not a function”.",
+      "summary": "Update the Motoko backend email/password authentication API so the actor exposes `signup`, `login`, `validateSession`, and `logout` methods with stable, structured return types compatible with the frontend’s expectations (i.e., Result-style responses that include a session token and user info on success, and an error message on failure).",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Switch Internet Identity origin to mcubes.net and implement missing email/password auth methods",
+  "projectName": "Fix email/password signup doing nothing by aligning frontend auth calls with backend actor methods",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -97,20 +97,31 @@ export function LoginModal({ open, onOpenChange, onAuthSuccess }: LoginModalProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear previous errors before submitting
+    setValidationError('');
+    clearError();
+
     if (!validateForm()) {
       return;
     }
 
-    if (mode === 'signup') {
-      const result = await signup(email.trim(), password);
-      if (!result.success && result.error) {
-        setValidationError(result.error);
+    try {
+      if (mode === 'signup') {
+        const result = await signup(email.trim().toLowerCase(), password);
+        if (!result.success && result.error) {
+          setValidationError(result.error);
+        }
+      } else {
+        const result = await login(email.trim().toLowerCase(), password);
+        if (!result.success && result.error) {
+          setValidationError(result.error);
+        }
       }
-    } else {
-      const result = await login(email.trim(), password);
-      if (!result.success && result.error) {
-        setValidationError(result.error);
-      }
+    } catch (err: any) {
+      // Catch any unexpected errors and display them
+      const errorMsg = err.message || 'An unexpected error occurred';
+      console.error('Auth error:', err);
+      setValidationError(errorMsg);
     }
   };
 

@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-13T01:34:35.289Z",
+  "generatedAt": "2026-02-13T01:53:22.753Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,34 +12,35 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Implement Motoko backend support for email+password authentication so the frontend calls `(actor as any).signup`, `(actor as any).login`, `(actor as any).validateSession`, and `(actor as any).logout` do not throw “is not a function”.",
+        "summary": "Update the Motoko backend email/password authentication API so the actor exposes `signup`, `login`, `validateSession`, and `logout` methods with stable, structured return types compatible with the frontend’s expectations (i.e., Result-style responses that include a session token and user info on success, and an error message on failure).",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
+        "summary": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/config.ts",
-          "frontend/src/backend.d.ts"
+          "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "frontend/src/components/LoginModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/backend.d.ts"
+          "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "frontend/src/components/LoginModal.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
+        "summary": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/config.ts",
-          "frontend/src/config/iiOrigins.ts",
-          "frontend/src/main.tsx"
+          "frontend/src/backend.d.ts",
+          "frontend/src/hooks/useEmailPasswordAuth.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/config/iiOrigins.ts"
+          "frontend/src/backend.d.ts",
+          "frontend/src/hooks/useEmailPasswordAuth.tsx"
         ]
       }
     ]
@@ -52,9 +53,10 @@
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/config/iiOrigins.ts",
+    "frontend/src/components/LoginModal.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useEmailPasswordAuth.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

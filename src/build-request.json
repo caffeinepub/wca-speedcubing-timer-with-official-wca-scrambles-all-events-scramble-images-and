@@ -1,75 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Switch Internet Identity origin to mcubes.net and implement missing email/password auth methods",
-  "priority": "normal",
+  "title": "Fix email/password signup doing nothing by aligning frontend auth calls with backend actor methods",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement Motoko backend support for email+password authentication so the frontend calls `(actor as any).signup`, `(actor as any).login`, `(actor as any).validateSession`, and `(actor as any).logout` do not throw “is not a function”.",
+      "text": "Update the Motoko backend email/password authentication API so the actor exposes `signup`, `login`, `validateSession`, and `logout` methods with stable, structured return types compatible with the frontend’s expectations (i.e., Result-style responses that include a session token and user info on success, and an error message on failure).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-5"
         ],
         "quotes": [
-          "Just email and pass signup and sinnin using popip",
-          "Screenshot shows: \"actor.signup is not a function\""
+          "Tried to create account Nothing happens no error or anything"
         ]
       },
       "acceptanceCriteria": [
-        "Backend canister exports `signup(email, password)`, `login(email, password)`, `validateSession(token)`, and `logout(token)` methods in `backend/main.mo`.",
-        "Calling `signup` from the current `frontend/src/hooks/useEmailPasswordAuth.tsx` no longer throws a JavaScript runtime error and returns a Motoko Result type with `Ok`/`Err` fields as expected by the frontend.",
-        "Calling `login` from the current `frontend/src/hooks/useEmailPasswordAuth.tsx` no longer throws a JavaScript runtime error and returns a Motoko Result type with `Ok`/`Err` fields as expected by the frontend.",
-        "`validateSession` returns `Ok { userId; email }` for valid tokens and `Err` (or non-Ok) for invalid/expired tokens, matching the frontend restore-session logic.",
-        "`logout` invalidates the provided session token so subsequent `validateSession` calls fail for that token."
+        "Backend canister exports callable methods named `signup`, `login`, `validateSession`, and `logout` (no \"is not a function\" errors from the frontend).",
+        "`signup(email, password)` returns success with a session token and user identifier when the email is not already registered, and returns a clear error message when it is already registered.",
+        "`login(email, password)` returns success with a session token and user info when credentials are valid, and a clear error message when invalid.",
+        "`validateSession(token)` returns success with user info for a valid/unexpired token, and a clear failure response for invalid/expired tokens.",
+        "`logout(token)` invalidates the session token so subsequent `validateSession(token)` calls fail."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
+      "text": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-5"
         ],
         "quotes": [
-          "use mcubes.net as Domain and hope it can change in future",
-          "Then let's use internet identity as default login and use own domain or canister means caffeine.xyz should not be visible"
+          "Tried to create account Nothing happens no error or anything"
         ]
       },
       "acceptanceCriteria": [
-        "Internet Identity login popup displays `mcubes.net` (or the mcubes.net origin) when users authenticate.",
-        "The app continues to function with Internet Identity after the domain change (actor creation in `frontend/src/hooks/useActor.ts` still succeeds after II login)."
+        "Clicking “Sign Up” shows a loading state immediately and then either authenticates the user (closing the modal) or displays a readable error message inside the modal.",
+        "If the backend call throws (network/canister error), the error is caught and shown in the modal rather than failing silently.",
+        "Session restoration on page load uses `validateSession` and correctly sets authenticated state when the stored token is valid; invalid tokens are removed from localStorage.",
+        "No uncaught exceptions are produced in the browser console during signup/login/restore flows."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
+      "text": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
       "target": "both",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-7"
         ],
         "quotes": [
-          "hope it can change in future"
+          "Try again"
         ]
       },
       "acceptanceCriteria": [
-        "Frontend config supports setting `ii_derivation_origin` to a stable value that can remain constant across future domain changes.",
-        "Project includes a clear, implemented configuration point for listing/using alternative origins so that moving from `mcubes.net` to a future domain does not change the user’s principal (when configured).",
-        "No changes are made to `frontend/src/hooks/useInternetIdentity.ts` beyond consuming the config it already loads (i.e., keep the immutable hook file intact if it is on the immutable list in this environment)."
+        "Frontend build output includes the auth methods on the actor instance created by `createActorWithConfig`.",
+        "Manual test: opening the signup modal and submitting valid inputs performs a canister call (visible in network/agent logs) rather than failing due to missing methods."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo` (single-actor architecture).",
-    "Do not edit any files under `frontend/src/components/ui` (read-only UI components).",
-    "Do not edit immutable frontend paths listed by the platform (e.g., `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`)—compose around them via configuration or new files if needed."
+    "Do not edit files under `frontend/src/hooks/useActor.ts`, `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/main.tsx`, or anything in `frontend/src/components/ui` (they are immutable).",
+    "Keep all backend logic in the single Motoko actor (`backend/main.mo`); only add `backend/migration.mo` if a state migration is strictly necessary."
   ],
   "nonGoals": [
-    "Hiding or masking the domain name inside the Internet Identity popup (not supported by the Internet Identity protocol).",
-    "Adding third-party authentication providers (Google/Facebook/GitHub/Auth0).",
-    "Implementing real-time features (WebSockets/push notifications)."
+    "Implementing secure password hashing, email verification, password reset, or production-grade account security (current flow is explicitly demo/insecure).",
+    "Adding third-party authentication providers beyond Internet Identity."
   ],
   "imageRequirements": {
     "required": [],

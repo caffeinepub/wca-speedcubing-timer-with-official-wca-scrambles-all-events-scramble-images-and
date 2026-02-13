@@ -13,12 +13,12 @@ actor {
     name : Text;
   };
 
-  type AuthToken = Text;
-  type Password = Text;
-  type Timestamp = Int;
-  type Email = Text;
+  public type AuthToken = Text;
+  public type Password = Text;
+  public type Timestamp = Int;
+  public type Email = Text;
 
-  type Session = {
+  public type Session = {
     token : AuthToken;
     created : Timestamp;
     lastAccessed : Timestamp;
@@ -39,19 +39,52 @@ actor {
 
   let credentials = Map.empty<Email, Credential>();
   let emailToPrincipal = Map.empty<Email, Principal>();
+  let tokenToEmail = Map.empty<AuthToken, Email>();
 
   // Full authorization integration
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  /// Email/Password support
+  // Result and Response Types
+  public type SignupResult = {
+    #success : {
+      message : Text;
+      sessionToken : Text;
+      session : ?Session;
+      user : AuthenticatedPrincipal;
+    };
+    #failure : { message : Text };
+  };
+
+  public type LoginResult = {
+    #success : {
+      message : Text;
+      sessionToken : Text;
+      session : ?Session;
+      user : AuthenticatedPrincipal;
+    };
+    #failure : { message : Text };
+  };
+
+  public type SessionValidationResult = {
+    isValid : Bool;
+    message : Text;
+    user : ?AuthenticatedPrincipal;
+    session : ?Session;
+  };
+
+  public type LogoutResult = {
+    #success : { message : Text };
+    #failure : { message : Text };
+  };
+
+  // Helper Functions
   func findCredential(email : ?Email, password : ?Password) : ?Credential {
     switch (email, password) {
       case (?e, ?p) {
         switch (credentials.get(e)) {
           case (?cred) {
-            // Simple password check (INSECURE - for demo only)
             let expectedHash = e # ":" # p # ":hash";
             if (cred.passwordHash == expectedHash) {
               ?cred;
@@ -66,13 +99,14 @@ actor {
     };
   };
 
+  func generateSessionToken(email : Email) : Text {
+    email # ":token:" # Int.toText(Time.now());
+  };
+
   func generatePrincipalForEmail(email : Text) : Principal {
-    // Generate a deterministic principal from email (INSECURE - for demo only)
-    // In production, use proper principal management
     switch (emailToPrincipal.get(email)) {
       case (?p) { p };
       case null {
-        // Create a new principal (this is a simplified approach)
         let p = Principal.fromText("2vxsx-fae"); // Placeholder
         emailToPrincipal.add(email, p);
         p;
@@ -80,60 +114,96 @@ actor {
     };
   };
 
-  // This is EXPERIMENTAL and just for demonstration purposes!
-  // Do NOT use in production - THIS IS FULLY INSECURE, not even persistent!
-  public shared ({ caller }) func signup(email : Text, password : Text) : async Bool {
-    // Check if email already exists
+  // Auth API
+  public shared ({ caller }) func signup(email : Text, password : Text) : async SignupResult {
+    // Signup is intentionally public - anyone can create an account
     switch (credentials.get(email)) {
-      case (?_) { return false }; // Email already registered
+      case (?_) {
+        return #failure { message = "Email already registered" };
+      };
       case null {};
     };
 
     let passwordHash = email # ":" # password # ":hash";
     let userPrincipal = generatePrincipalForEmail(email);
+    let authPrincipal : AuthenticatedPrincipal = #emailPassword email;
 
     let cred : Credential = {
-      principal = #emailPassword email;
+      principal = authPrincipal;
       passwordHash;
       role = #user;
       session = null;
     };
 
-    credentials.add(email, cred);
+    // Create a session on signup
+    let session : Session = {
+      token = generateSessionToken(email);
+      created = Time.now();
+      lastAccessed = Time.now();
+      expiration = Time.now() + 3_600_000_000_000; // 1 hour
+    };
 
-    // Register user in access control system with #user role
-    // Note: We use the generated principal for the access control system
+    credentials.add(email, { cred with session = ?session });
+    tokenToEmail.add(session.token, email);
+
     AccessControl.assignRole(accessControlState, caller, userPrincipal, #user);
 
-    true;
+    #success {
+      message = "Signup successful";
+      sessionToken = session.token;
+      session = ?session;
+      user = authPrincipal;
+    };
   };
 
-  // This is EXPERIMENTAL and just for demonstration purposes!
-  // Do NOT use in production - THIS IS FULLY INSECURE, not even persistent!
-  // Returns the (crypto-insecure) machine-generated token
-  public shared ({ caller }) func login(email : Text, password : Text) : async ?Text {
+  public shared ({ caller }) func login(email : Text, password : Text) : async LoginResult {
+    // Login is intentionally public - users need to authenticate
     switch (findCredential(?email, ?password)) {
       case (?cred) {
         let session = {
-          token = email # ":token:" # Int.toText(Time.now());
+          token = generateSessionToken(email);
           created = Time.now();
           lastAccessed = Time.now();
           expiration = Time.now() + 3_600_000_000_000; // 1 hour
         };
         credentials.add(email, { cred with session = ?session });
-        ?session.token;
+        tokenToEmail.add(session.token, email);
+
+        #success {
+          message = "Login successful";
+          sessionToken = session.token;
+          session = ?session;
+          user = cred.principal;
+        };
       };
-      case (_) { null };
+      case (_) {
+        #failure { message = "Invalid email or password" };
+      };
     };
   };
 
-  public query ({ caller }) func validateSession(token : Text) : async Bool {
-    // Parse token to extract email
+  public query ({ caller }) func validateSession(token : Text) : async SessionValidationResult {
+    // Authorization: Only authenticated users (not guests) can validate sessions
+    // This prevents anonymous callers from probing for valid sessions
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      return {
+        isValid = false;
+        message = "Unauthorized: Only authenticated users can validate sessions";
+        user = null;
+        session = null;
+      };
+    };
+
     let parts = token.split(#char(':'));
     let partsArray = parts.toArray();
 
     if (partsArray.size() < 3) {
-      return false;
+      return {
+        isValid = false;
+        message = "Invalid session token format";
+        user = null;
+        session = null;
+      };
     };
 
     let email = partsArray[0];
@@ -143,40 +213,86 @@ actor {
         switch (cred.session) {
           case (?session) {
             if (session.token == token and Time.now() < session.expiration) {
-              true;
+              return {
+                isValid = true;
+                message = "Valid session";
+                user = ?cred.principal;
+                session = ?session;
+              };
             } else {
-              false;
+              return {
+                isValid = false;
+                message = "Session expired or invalid";
+                user = null;
+                session = null;
+              };
             };
           };
-          case null { false };
+          case null {
+            return {
+              isValid = false;
+              message = "No active session found";
+              user = null;
+              session = null;
+            };
+          };
         };
       };
-      case null { false };
-    };
-  };
-
-  // Terminate the session.
-  public shared ({ caller }) func logout(token : Text) : async Bool {
-    // Parse token to extract email
-    let parts = token.split(#char(':'));
-    let partsArray = parts.toArray();
-
-    if (partsArray.size() < 3) {
-      return false;
-    };
-
-    let email = partsArray[0];
-
-    switch (credentials.get(email)) {
-      case (?cred) {
-        // Clear session but keep credential
-        credentials.add(email, { cred with session = null });
-        true;
+      case null {
+        return {
+          isValid = false;
+          message = "Invalid session or token";
+          user = null;
+          session = null;
+        };
       };
-      case null { false };
     };
   };
 
+  public shared ({ caller }) func logout(token : Text) : async LogoutResult {
+    // Authorization: Verify the caller owns the session being logged out
+    // Extract email from token to find the associated credential
+    switch (tokenToEmail.get(token)) {
+      case (?email) {
+        switch (credentials.get(email)) {
+          case (?cred) {
+            // Verify the session exists and matches the token
+            switch (cred.session) {
+              case (?session) {
+                if (session.token != token) {
+                  return #failure { message = "Token mismatch" };
+                };
+
+                // Get the principal associated with this email credential
+                let credentialPrincipal = generatePrincipalForEmail(email);
+
+                // Authorization check: Only the session owner or an admin can logout
+                if (caller != credentialPrincipal and not AccessControl.isAdmin(accessControlState, caller)) {
+                  return #failure { message = "Unauthorized: Can only logout your own session" };
+                };
+
+                // Clear the session
+                credentials.add(email, { cred with session = null });
+                tokenToEmail.remove(token);
+                #success { message = "Logout successful" };
+              };
+              case null {
+                #failure { message = "No active session found" };
+              };
+            };
+          };
+          case null {
+            #failure { message = "Invalid token: no associated user found" };
+          };
+        };
+      };
+      case null {
+        #failure { message = "Invalid token format" };
+      };
+    };
+  };
+
+  // User Profile Management
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view profiles");

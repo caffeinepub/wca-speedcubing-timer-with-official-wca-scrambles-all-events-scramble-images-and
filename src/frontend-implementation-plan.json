@@ -1,51 +1,47 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Switch Internet Identity derivation origin to mcubes.net and add future-proof origin configuration (frontend-only)",
+  "title": "Align React email/password auth hook with backend actor auth methods and regenerated types",
   "requirements": [
     {
       "id": "REQ-2",
-      "summary": "Update frontend configuration so Internet Identity authentication uses mcubes.net as the derivation origin shown to users and remains compatible with existing actor creation after II login.",
+      "summary": "Update the email/password auth hook to use the backend actor’s actual auth return types and ensure all failures are surfaced in the login/signup modal (no silent failures).",
       "acceptanceCriteria": [
-        "Internet Identity login popup displays `mcubes.net` (or the mcubes.net origin) when users authenticate.",
-        "The app continues to function with Internet Identity after the domain change (actor creation in `frontend/src/hooks/useActor.ts` still succeeds after II login)."
+        "Clicking “Sign Up” shows a loading state immediately and then either authenticates the user (closing the modal) or displays a readable error message inside the modal.",
+        "If the backend call throws (network/canister error), the error is caught and shown in the modal rather than failing silently.",
+        "Session restoration on page load uses `validateSession` and correctly sets authenticated state when the stored token is valid; invalid tokens are removed from localStorage.",
+        "No uncaught exceptions are produced in the browser console during signup/login/restore flows."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/config.ts",
+          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
           "operation": "modify",
-          "description": "Update `loadConfig()` (from the core-infrastructure configuration layer) so the resolved `ii_derivation_origin` defaults to the mcubes.net origin and can be overridden via the existing environment/config mechanism. Verify the component's usage instructions before implementing."
+          "description": "Replace the current `Ok/Err`-style parsing and `any` actor calls with parsing for the declared `SignupResult`/`LoginResult` (`__kind__: 'success' | 'failure'`) and `SessionValidationResult` (`isValid` + optional `user/session`). Ensure: (1) restore flow calls `validateSession` and clears localStorage on invalid/expired tokens, (2) signup/login failures always set a readable `error` state, (3) thrown exceptions are caught and mapped to user-visible errors, (4) logout clears local token and user state even if the backend call fails."
         },
         {
-          "path": "frontend/src/backend.d.ts",
+          "path": "frontend/src/components/LoginModal.tsx",
           "operation": "modify",
-          "description": "Align the generated/declared backend interface typing expectations used by the frontend with the configured Internet Identity flow as needed (e.g., ensure no type-level drift in actor creation assumptions). Verify the component's usage instructions before implementing."
+          "description": "Ensure the modal always displays hook-provided errors (including thrown-call errors) and never fails silently. Clear prior validation/UI error state on submit, keep the existing loading/disabled behavior, and ensure failed signup/login results render a readable message inside the modal."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add a clear frontend configuration point for stable Internet Identity derivation origin and alternative origins to preserve principals across future domain changes, without modifying the immutable `useInternetIdentity` hook beyond its existing config consumption.",
+      "summary": "Update frontend actor type declarations so the compiled actor type includes `signup`, `login`, `validateSession`, and `logout` and remove runtime/type mismatches.",
       "acceptanceCriteria": [
-        "Frontend config supports setting `ii_derivation_origin` to a stable value that can remain constant across future domain changes.",
-        "Project includes a clear, implemented configuration point for listing/using alternative origins so that moving from `mcubes.net` to a future domain does not change the user’s principal (when configured).",
-        "No changes are made to `frontend/src/hooks/useInternetIdentity.ts` beyond consuming the config it already loads (i.e., keep the immutable hook file intact if it is on the immutable list in this environment)."
+        "Frontend build output includes the auth methods on the actor instance created by `createActorWithConfig`.",
+        "Manual test: opening the signup modal and submitting valid inputs performs a canister call (visible in network/agent logs) rather than failing due to missing methods."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/config.ts",
+          "path": "frontend/src/backend.d.ts",
           "operation": "modify",
-          "description": "Extend the config shape returned by `loadConfig()` to include an explicit, documented-in-code configuration field for Internet Identity alternative origins (e.g., `ii_alternative_origins`) while keeping `ii_derivation_origin` stable; ensure the hook continues to only consume `config.ii_derivation_origin`. Verify the component's usage instructions before implementing."
+          "description": "Regenerate/align the frontend canister type declarations so `backendInterface` accurately includes `signup`, `login`, `validateSession`, and `logout` with the structured return types expected by the frontend. This file should be the source of truth used by TypeScript during build to prevent missing-method runtime mismatches."
         },
         {
-          "path": "frontend/src/config/iiOrigins.ts",
-          "operation": "create",
-          "description": "Add a dedicated, single-responsibility module exporting the stable `ii_derivation_origin` default and an `ii_alternative_origins` list used by `loadConfig()` to centralize future domain-change configuration. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/main.tsx",
+          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
           "operation": "modify",
-          "description": "Wire a lightweight startup-time validation/logging step (non-blocking) that reads the resolved config and warns in development if the current `window.location.origin` is not present in the configured alternative origins list, aiding safe future domain migrations without changing `useInternetIdentity.ts`. Verify the component's usage instructions before implementing."
+          "description": "Remove `(actor as any)` usage and rely on the typed actor interface from the generated declarations (via the actor returned by `useActor`). This forces compile-time alignment with the regenerated declarations and prevents calling non-existent methods at runtime."
         }
       ]
     }

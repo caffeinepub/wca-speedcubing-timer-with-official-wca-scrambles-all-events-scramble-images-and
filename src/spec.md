@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Make authentication work end-to-end by adding missing backend email/password auth methods and ensuring Internet Identity uses `mcubes.net` as the displayed/derived origin while supporting future domain changes without changing user principals.
+**Goal:** Fix email/password signup/login doing nothing by aligning frontend auth calls with the backend canister’s exported auth methods and return types.
 
 **Planned changes:**
-- Implement Motoko canister methods in `backend/main.mo`: `signup(email, password)`, `login(email, password)`, `validateSession(token)`, and `logout(token)` returning `Result` shapes expected by the existing frontend hook.
-- Update frontend configuration so Internet Identity uses `mcubes.net` as the derivation origin shown during login, without changing immutable hooks.
-- Add/configure a clear configuration point for Internet Identity alternative origins and route the chosen stable `ii_derivation_origin` through the existing `loadConfig()` / `config.ii_derivation_origin` mechanism to preserve principals across future domain changes.
+- Update the Motoko actor to export `signup`, `login`, `validateSession`, and `logout` with stable, structured Result-style return values (session token + user info on success; readable error message on failure).
+- Update the React email/password auth hook to match the backend return shapes, show loading state, and surface all failures (including thrown/network errors) inside the login/signup modal.
+- Regenerate/update frontend backend-actor type declarations so the compiled actor includes `signup`, `login`, `validateSession`, and `logout`, preventing runtime interface mismatches.
 
-**User-visible outcome:** Users can sign up, sign in, restore sessions, and log out using email/password without runtime “is not a function” errors, and Internet Identity login shows `mcubes.net` while remaining compatible with future domain moves (when configured).
+**User-visible outcome:** Users can sign up and log in with email/password and will either be authenticated (modal closes) or see a clear error message; sessions restore correctly on page load and logout invalidates the session.

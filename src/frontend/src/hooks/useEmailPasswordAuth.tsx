@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useActor } from './useActor';
+import type { backendInterface, AuthenticatedPrincipal } from '../backend';
 
 interface User {
   userId: string;
@@ -31,6 +32,13 @@ interface EmailPasswordAuthProviderProps {
   children: ReactNode;
 }
 
+function extractEmailFromPrincipal(principal: AuthenticatedPrincipal): string {
+  if (principal.__kind__ === 'emailPassword') {
+    return principal.emailPassword;
+  }
+  return 'unknown';
+}
+
 export function EmailPasswordAuthProvider({ children }: EmailPasswordAuthProviderProps) {
   const { actor, isFetching: actorFetching } = useActor();
   const [user, setUser] = useState<User | null>(null);
@@ -50,22 +58,21 @@ export function EmailPasswordAuthProvider({ children }: EmailPasswordAuthProvide
       }
 
       try {
-        // Call backend to validate session token
-        const result = await (actor as any).validateSession(token);
+        const typedActor = actor as backendInterface;
+        const result = await typedActor.validateSession(token);
         
-        // Handle Result type from backend
-        if ('Ok' in result) {
-          const userData = result.Ok;
+        if (result.isValid && result.user) {
+          const email = extractEmailFromPrincipal(result.user);
           setUser({
-            userId: userData.userId,
-            email: userData.email,
+            userId: email,
+            email,
           });
         } else {
           // Token invalid or expired
           localStorage.removeItem(SESSION_TOKEN_KEY);
           setUser(null);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Session restoration failed:', err);
         localStorage.removeItem(SESSION_TOKEN_KEY);
         setUser(null);
@@ -86,21 +93,23 @@ export function EmailPasswordAuthProvider({ children }: EmailPasswordAuthProvide
     setError(null);
 
     try {
-      const result = await (actor as any).signup(email, password);
+      const typedActor = actor as backendInterface;
+      const result = await typedActor.signup(email, password);
       
-      // Handle Result type from backend
-      if ('Ok' in result) {
-        const { userId, sessionToken } = result.Ok;
+      if (result.__kind__ === 'success') {
+        const { sessionToken, user: authUser } = result.success;
+        const userEmail = extractEmailFromPrincipal(authUser);
         localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
-        setUser({ userId, email: email.toLowerCase() });
+        setUser({ userId: userEmail, email: userEmail });
         return { success: true };
       } else {
-        const errorMsg = result.Err || 'Signup failed';
+        const errorMsg = result.failure.message || 'Signup failed';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
     } catch (err: any) {
-      const errorMsg = err.message || 'An unexpected error occurred';
+      const errorMsg = err.message || 'An unexpected error occurred during signup';
+      console.error('Signup error:', err);
       setError(errorMsg);
       return { success: false, error: errorMsg };
     } finally {
@@ -117,21 +126,23 @@ export function EmailPasswordAuthProvider({ children }: EmailPasswordAuthProvide
     setError(null);
 
     try {
-      const result = await (actor as any).login(email, password);
+      const typedActor = actor as backendInterface;
+      const result = await typedActor.login(email, password);
       
-      // Handle Result type from backend
-      if ('Ok' in result) {
-        const { userId, sessionToken, email: userEmail } = result.Ok;
+      if (result.__kind__ === 'success') {
+        const { sessionToken, user: authUser } = result.success;
+        const userEmail = extractEmailFromPrincipal(authUser);
         localStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
-        setUser({ userId, email: userEmail });
+        setUser({ userId: userEmail, email: userEmail });
         return { success: true };
       } else {
-        const errorMsg = result.Err || 'Invalid email or password';
+        const errorMsg = result.failure.message || 'Invalid email or password';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
     } catch (err: any) {
-      const errorMsg = err.message || 'An unexpected error occurred';
+      const errorMsg = err.message || 'An unexpected error occurred during login';
+      console.error('Login error:', err);
       setError(errorMsg);
       return { success: false, error: errorMsg };
     } finally {
@@ -144,9 +155,11 @@ export function EmailPasswordAuthProvider({ children }: EmailPasswordAuthProvide
     
     if (token && actor) {
       try {
-        await (actor as any).logout(token);
+        const typedActor = actor as backendInterface;
+        await typedActor.logout(token);
       } catch (err) {
         console.error('Logout error:', err);
+        // Continue with local cleanup even if backend call fails
       }
     }
 

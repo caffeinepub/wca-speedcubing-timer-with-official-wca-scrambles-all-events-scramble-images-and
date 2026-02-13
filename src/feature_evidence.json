@@ -2,9 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-internet-identity-login-flow-uses-mcubes-net-as-the-origin-shown-to-users-instead-of-caffeine-xyz-by-updating-the-frontend-configuration-used-by-useinternetidentity-derivation-origin-and-any-related-deployment-environment-configuration",
-      "featureTitle": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
-      "files": [],
+      "featureId": "feature-update-the-react-email-password-auth-hook-to-match-the-backend-s-actual-return-types-for-signup-login-validatesession-and-logout-and-ensure-all-failures-surface-a-user-visible-error-in-the-login-signup-modal-no-silent-failures",
+      "featureTitle": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
+      "files": [
+        "frontend/src/components/LoginModal.tsx",
+        "frontend/src/hooks/useEmailPasswordAuth.tsx"
+      ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
@@ -19,10 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-support-for-changing-the-app-domain-in-the-future-while-preserving-internet-identity-principals-by-configuring-internet-identity-alternative-origins-and-wiring-the-chosen-derivation-origin-through-the-existing-frontend-config-mechanism-used-by-loadconfig-config-ii-derivation-origin",
-      "featureTitle": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
+      "featureId": "feature-regenerate-update-the-frontend-backend-actor-type-declarations-so-the-compiled-frontend-actor-type-includes-the-newly-supported-signup-login-validatesession-and-logout-methods-eliminating-runtime-mismatches-between-declared-and-deployed-canister-interfaces",
+      "featureTitle": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
       "files": [
-        "frontend/src/config/iiOrigins.ts"
+        "frontend/src/hooks/useEmailPasswordAuth.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
