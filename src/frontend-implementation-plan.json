@@ -1,51 +1,51 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Email/password auth modal + frontend auth state (session-token based)",
+  "title": "Switch Internet Identity derivation origin to mcubes.net and add future-proof origin configuration (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-3",
-      "summary": "Replace the Internet Identity login modal with an email/password modal (signup + login) and integrate it into TimerScreen first-visit and header-icon flows.",
+      "id": "REQ-2",
+      "summary": "Update frontend configuration so Internet Identity authentication uses mcubes.net as the derivation origin shown to users and remains compatible with existing actor creation after II login.",
       "acceptanceCriteria": [
-        "`frontend/src/components/LoginModal.tsx` no longer prompts for Internet Identity and instead provides email + password inputs with clear actions for “Sign up” and “Log in”.",
-        "The first-visit behavior remains: on a fresh browser, unauthenticated users see the modal automatically once; dismissing it sets the existing localStorage flag (`wca-timer-first-visit-seen`).",
-        "The header login icon in `TimerScreen` opens the same modal on demand when the user is logged out.",
-        "All user-facing text in the modal is in English.",
-        "Form validation is present (e.g., required fields; basic email format; password minimum length)."
+        "Internet Identity login popup displays `mcubes.net` (or the mcubes.net origin) when users authenticate.",
+        "The app continues to function with Internet Identity after the domain change (actor creation in `frontend/src/hooks/useActor.ts` still succeeds after II login)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/LoginModal.tsx",
+          "path": "frontend/src/config.ts",
           "operation": "modify",
-          "description": "Replace Internet Identity UI with an email/password form supporting both Sign up and Log in, wired to the new email/password auth hook actions; add client-side validation (required, basic email format, minimum password length), loading/disabled states, and English-only copy. Keep the Dialog + Button patterns from shadcn-ui; verify the component's usage instructions before implementing."
+          "description": "Update `loadConfig()` (from the core-infrastructure configuration layer) so the resolved `ii_derivation_origin` defaults to the mcubes.net origin and can be overridden via the existing environment/config mechanism. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/TimerScreen.tsx",
+          "path": "frontend/src/backend.d.ts",
           "operation": "modify",
-          "description": "Replace Internet Identity-derived authentication checks with the new email/password auth state (`isAuthenticated`, `isInitializing/loading` as applicable) while preserving: (1) first-visit auto-open behavior using `wca-timer-first-visit-seen`, and (2) header login icon opening the same LoginModal when logged out."
+          "description": "Align the generated/declared backend interface typing expectations used by the frontend with the configured Internet Identity flow as needed (e.g., ensure no type-level drift in actor creation assumptions). Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-4",
-      "summary": "Add a new frontend auth provider/hook for email/password auth that persists a backend-issued session token and restores auth state on refresh without using useInternetIdentity for app logic.",
+      "id": "REQ-3",
+      "summary": "Add a clear frontend configuration point for stable Internet Identity derivation origin and alternative origins to preserve principals across future domain changes, without modifying the immutable `useInternetIdentity` hook beyond its existing config consumption.",
       "acceptanceCriteria": [
-        "A new auth hook/provider exists (new file(s)) that manages: current user (or null), auth status, loading/error states, and actions for signup/login/logout.",
-        "On successful login/signup, the session token is persisted in the browser (e.g., localStorage) and the app becomes authenticated without requiring Internet Identity.",
-        "On app load/refresh, if a token is present, the frontend attempts to validate it via the backend and restores authenticated state.",
-        "Logout clears the stored token and returns the UI to logged-out state.",
-        "No changes are requested to immutable files (`frontend/src/main.tsx`, `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`); the new auth layer is used by app components instead."
+        "Frontend config supports setting `ii_derivation_origin` to a stable value that can remain constant across future domain changes.",
+        "Project includes a clear, implemented configuration point for listing/using alternative origins so that moving from `mcubes.net` to a future domain does not change the user’s principal (when configured).",
+        "No changes are made to `frontend/src/hooks/useInternetIdentity.ts` beyond consuming the config it already loads (i.e., keep the immutable hook file intact if it is on the immutable list in this environment)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
-          "operation": "create",
-          "description": "Create a React context/provider + hook that manages email/password authentication state: `user` (at minimum: email and user id), `isAuthenticated`, `isLoading`/`isRestoringSession`, `error`, and actions `signup`, `login`, `logout`. Persist the session token to localStorage and, on app load, if a token exists, call backend capability to validate it and restore user state. Use `useActor` to obtain an actor for calling backend capabilities (do not modify `useActor`)."
+          "path": "frontend/src/config.ts",
+          "operation": "modify",
+          "description": "Extend the config shape returned by `loadConfig()` to include an explicit, documented-in-code configuration field for Internet Identity alternative origins (e.g., `ii_alternative_origins`) while keeping `ii_derivation_origin` stable; ensure the hook continues to only consume `config.ii_derivation_origin`. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/config/iiOrigins.ts",
+          "operation": "create",
+          "description": "Add a dedicated, single-responsibility module exporting the stable `ii_derivation_origin` default and an `ii_alternative_origins` list used by `loadConfig()` to centralize future domain-change configuration. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/main.tsx",
           "operation": "modify",
-          "description": "Wrap the existing app content (TimerScreen) with the new EmailPasswordAuthProvider so that authentication state and actions are available to UI components without relying on Internet Identity for application logic."
+          "description": "Wire a lightweight startup-time validation/logging step (non-blocking) that reads the resolved config and warns in development if the current `window.location.origin` is not present in the configured alternative origins list, aiding safe future domain migrations without changing `useInternetIdentity.ts`. Verify the component's usage instructions before implementing."
         }
       ]
     }

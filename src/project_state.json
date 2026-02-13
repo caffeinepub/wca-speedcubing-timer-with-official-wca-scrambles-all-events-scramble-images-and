@@ -1,29 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build a custom authentication system using email + password with signup and login, storing user accounts securely in a Motoko backend canister (replacing Internet Identity / OTPless).",
+  "summary": "Project now includes Internet Identity-based auth with plans for admin-only user management, plus email/password signup+signin via popup, and migration to a custom domain (mcubes.net) with ability to change domains in the future (via alternative origins).",
   "architectural_notes": [
-    "Use Motoko backend canister to store user accounts with securely hashed passwords (no plaintext).",
-    "Replace existing Internet Identity/OTPless login UI flow with custom email+password signup/login screens."
+    "Internet Identity cannot hide the origin/domain in the login popup; use a custom domain and/or alternative origins for migrations.",
+    "Admin identification must be based on an Internet Identity principal (email alone is not sufficient)."
   ],
   "known_issues": [
-    "Previous attempt to implement email+password signup/login failed to build/deploy; needs retry."
+    "Signup popup error: \"actor.signup is not a function\" during account creation / email auth; users unable to sign in."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-replace-the-existing-internet-identity-based-login-modal-ui-with-an-email-password-authentication-modal-that-supports-both-signup-and-login-and-integrate-it-into-frontend-src-components-timerscreen-tsx-so-it-still-a-auto-opens-on-first-visit-for-unauthenticated-users-and-b-can-be-opened-via-the-existing-header-login-icon",
-      "title": "Replace the existing Internet Identity-based login modal UI with an email/password authentication modal that supports both signup and login, and integrate it into `frontend/src/components/TimerScreen.tsx` so it still (a) auto-opens on first visit for unauthenticated users and (b) can be opened via the existing header login icon.",
+      "id": "feature-ensure-the-internet-identity-login-flow-uses-mcubes-net-as-the-origin-shown-to-users-instead-of-caffeine-xyz-by-updating-the-frontend-configuration-used-by-useinternetidentity-derivation-origin-and-any-related-deployment-environment-configuration",
+      "title": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
       "reqIds": [
-        "REQ-3"
+        "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-a-new-frontend-authentication-state-layer-new-hook-provider-for-email-password-auth-that-stores-the-session-token-locally-exposes-signup-login-and-logout-actions-and-exposes-isauthenticated-current-user-info-to-the-ui-without-relying-on-useinternetidentity-for-application-logic",
-      "title": "Implement a new frontend authentication state layer (new hook/provider) for email/password auth that stores the session token locally, exposes `signup`, `login`, and `logout` actions, and exposes `isAuthenticated` + current user info to the UI without relying on `useInternetIdentity` for application logic.",
+      "id": "feature-add-support-for-changing-the-app-domain-in-the-future-while-preserving-internet-identity-principals-by-configuring-internet-identity-alternative-origins-and-wiring-the-chosen-derivation-origin-through-the-existing-frontend-config-mechanism-used-by-loadconfig-config-ii-derivation-origin",
+      "title": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
       "reqIds": [
-        "REQ-4"
+        "REQ-3"
       ],
       "version": 1
     }
@@ -31,28 +31,50 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Implement custom email+password authentication: user signup and future login, with accounts stored securely (hashed passwords) in Motoko backend canister; update UI to use this instead of Internet Identity/OTPless.",
+      "summary": "Treat the Internet Identity user (principal) associated with midhun.speedcuber@gmail.com as the admin (admin principal to be provided after login)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Implement a custom email + password authentication system in the Motoko backend canister, supporting user signup and future login with securely stored credentials (store a per-user salt + password hash; never store plaintext passwords).",
-      "reqIds": [
-        "REQ-1"
-      ],
+      "summary": "Admin dashboard for managing non-admin users after login: edit user profile data (incl. app-level password), block/unblock, delete, and reset session",
+      "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Add backend session management for the custom auth system so the frontend can remain logged in across page refreshes using a backend-issued session token, with methods to get the current authenticated user from a token and to log out (invalidate the token).",
+      "summary": "Implement email+password signup and signin flow inside a popup (app-level auth)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Fix signup/signin errors: \"actor.signup is not a function\" and inability to sign in from the signup popup",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Use mcubes.net as the custom domain for the app (so Internet Identity shows mcubes.net instead of the prior domain)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Support changing the app domain in the future while preserving Internet Identity principals via alternative origins configuration",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement Motoko backend support for email+password authentication so the frontend calls `(actor as any).signup`, `(actor as any).login`, `(actor as any).validateSession`, and `(actor as any).logout` do not throw “is not a function”.",
       "reqIds": [
-        "REQ-2"
+        "REQ-1"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Replace Internet Identity flow with custom email/password signup + login (Motoko-backed)",
+  "projectName": "Switch Internet Identity origin to mcubes.net and implement missing email/password auth methods",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

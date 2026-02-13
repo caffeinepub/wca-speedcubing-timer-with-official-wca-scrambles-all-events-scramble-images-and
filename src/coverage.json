@@ -1,76 +1,60 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-13T00:46:22.727Z",
+  "generatedAt": "2026-02-13T01:34:35.289Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 3,
     "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Implement a custom email + password authentication system in the Motoko backend canister, supporting user signup and future login with securely stored credentials (store a per-user salt + password hash; never store plaintext passwords).",
+        "summary": "Implement Motoko backend support for email+password authentication so the frontend calls `(actor as any).signup`, `(actor as any).login`, `(actor as any).validateSession`, and `(actor as any).logout` do not throw “is not a function”.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Add backend session management for the custom auth system so the frontend can remain logged in across page refreshes using a backend-issued session token, with methods to get the current authenticated user from a token and to log out (invalidate the token).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Replace the existing Internet Identity-based login modal UI with an email/password authentication modal that supports both signup and login, and integrate it into `frontend/src/components/TimerScreen.tsx` so it still (a) auto-opens on first visit for unauthenticated users and (b) can be opened via the existing header login icon.",
+        "summary": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/LoginModal.tsx",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/config.ts",
+          "frontend/src/backend.d.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/LoginModal.tsx",
-          "frontend/src/components/TimerScreen.tsx"
+          "frontend/src/backend.d.ts"
         ]
       },
       {
-        "id": "REQ-4",
-        "summary": "Implement a new frontend authentication state layer (new hook/provider) for email/password auth that stores the session token locally, exposes `signup`, `login`, and `logout` actions, and exposes `isAuthenticated` + current user info to the UI without relying on `useInternetIdentity` for application logic.",
+        "id": "REQ-3",
+        "summary": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useEmailPasswordAuth.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/config.ts",
+          "frontend/src/config/iiOrigins.ts",
+          "frontend/src/main.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useEmailPasswordAuth.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/config/iiOrigins.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/authorization/MixinAuthorization.mo",
-    "backend/authorization/access-control.mo",
     "backend/main.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/LoginModal.tsx",
-    "frontend/src/components/TimerScreen.tsx",
+    "frontend/src/config/iiOrigins.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useEmailPasswordAuth.tsx",
-    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

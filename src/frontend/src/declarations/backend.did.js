@@ -26,7 +26,11 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'login' : IDL.Func([IDL.Text, IDL.Text], [IDL.Opt(IDL.Text)], []),
+  'logout' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'signup' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
+  'validateSession' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -50,7 +54,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'login' : IDL.Func([IDL.Text, IDL.Text], [IDL.Opt(IDL.Text)], []),
+    'logout' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'signup' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
+    'validateSession' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   });
 };
 

@@ -22,5 +22,9 @@
   "frontend/src/components/SolveHistory.tsx": "Displays solve history in a scrollable grid with max 5 items per row, showing solve numbers and results with DNF highlighting.",
   "frontend/src/components/SessionStats.tsx": "Displays session statistics (Current, Best, ao5, ao12, mo3) in a responsive grid layout.",
   "frontend/src/components/LoginModal.tsx": "Modal dialog component with email/password form supporting both signup and login modes, with validation, error handling, and mode switching.",
-  "frontend/src/hooks/useEmailPasswordAuth.tsx": "React context provider and hook for email/password authentication with signup, login, logout, and session restoration using localStorage-persisted tokens validated against backend."
+  "frontend/src/hooks/useEmailPasswordAuth.tsx": "React context provider and hook for email/password authentication with signup, login, logout, and session restoration using localStorage-persisted tokens validated against backend.",
+  "frontend/src/config/iiOrigins.ts": "Centralized configuration module exporting the stable Internet Identity derivation origin (mcubes.net) and alternative origins list for future domain migration support.",
+  "frontend/src/config.ts": "Configuration loader that provides app-wide settings including Internet Identity derivation origin and alternative origins, with extensibility for environment-based overrides.",
+  "frontend/src/main.tsx": "Application entry point with QueryClient, InternetIdentityProvider, and development-mode validation that warns when the current origin is not in the configured alternative origins list.",
+  "frontend/src/backend.d.ts": "TypeScript interface definitions for the backend canister, including UserProfile, UserRole enum, and all backend methods (signup, login, logout, validateSession, profile management)."
 }

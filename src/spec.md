@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Replace the existing Internet Identity login flow with a custom email/password signup + login system backed by the Motoko canister, including session tokens so users stay logged in across refreshes.
+**Goal:** Make authentication work end-to-end by adding missing backend email/password auth methods and ensuring Internet Identity uses `mcubes.net` as the displayed/derived origin while supporting future domain changes without changing user principals.
 
 **Planned changes:**
-- Add Motoko backend support for email/password `signup` and `login`, storing per-user salt + password hash (no plaintext passwords) and treating emails case-insensitively.
-- Add backend session token management: issue token on login, validate token to fetch current user (email + user id), and logout/invalidate token; persist backend state across upgrades (adding migration only if needed).
-- Update `frontend/src/components/LoginModal.tsx` to an English email/password modal with both “Sign up” and “Log in”, including basic form validation.
-- Integrate the updated modal into `frontend/src/components/TimerScreen.tsx` to preserve current behavior: auto-open on first visit for logged-out users and open via the existing header login icon.
-- Implement a new frontend auth hook/provider that stores the session token locally, restores auth on refresh by validating the token with the backend, and exposes `signup`, `login`, `logout`, `isAuthenticated`, and current user info without relying on Internet Identity for app logic.
+- Implement Motoko canister methods in `backend/main.mo`: `signup(email, password)`, `login(email, password)`, `validateSession(token)`, and `logout(token)` returning `Result` shapes expected by the existing frontend hook.
+- Update frontend configuration so Internet Identity uses `mcubes.net` as the derivation origin shown during login, without changing immutable hooks.
+- Add/configure a clear configuration point for Internet Identity alternative origins and route the chosen stable `ii_derivation_origin` through the existing `loadConfig()` / `config.ii_derivation_origin` mechanism to preserve principals across future domain changes.
 
-**User-visible outcome:** Users can sign up and log in with email/password, remain logged in across page refreshes via a session token, and log out; the app no longer prompts for Internet Identity.
+**User-visible outcome:** Users can sign up, sign in, restore sessions, and log out using email/password without runtime “is not a function” errors, and Internet Identity login shows `mcubes.net` while remaining compatible with future domain moves (when configured).

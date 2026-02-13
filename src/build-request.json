@@ -1,105 +1,75 @@
 {
   "kind": "build_request",
-  "title": "Replace Internet Identity flow with custom email/password signup + login (Motoko-backed)",
+  "title": "Switch Internet Identity origin to mcubes.net and implement missing email/password auth methods",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement a custom email + password authentication system in the Motoko backend canister, supporting user signup and future login with securely stored credentials (store a per-user salt + password hash; never store plaintext passwords).",
+      "text": "Implement Motoko backend support for email+password authentication so the frontend calls `(actor as any).signup`, `(actor as any).login`, `(actor as any).validateSession`, and `(actor as any).logout` do not throw “is not a function”.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-recent-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Then try using basic login method using email and pass",
-          "1. Yes\n2. Yes\n3. Yes signup allows and used for future login",
-          "Yes."
+          "Just email and pass signup and sinnin using popip",
+          "Screenshot shows: \"actor.signup is not a function\""
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes a `signup` method that creates a new account for an email and password and returns a clear success/error result (e.g., email already exists).",
-        "Backend exposes a `login` method that validates email+password and returns a session token (or equivalent) on success and a clear error on failure.",
-        "Passwords are not stored in plaintext; stored data includes a salt and a hash derived from the password.",
-        "User emails are treated case-insensitively (normalized consistently on both signup and login).",
-        "Backend state persists across upgrades using stable storage; add `backend/migration.mo` only if required by existing persisted state (conditional migration policy)."
+        "Backend canister exports `signup(email, password)`, `login(email, password)`, `validateSession(token)`, and `logout(token)` methods in `backend/main.mo`.",
+        "Calling `signup` from the current `frontend/src/hooks/useEmailPasswordAuth.tsx` no longer throws a JavaScript runtime error and returns a Motoko Result type with `Ok`/`Err` fields as expected by the frontend.",
+        "Calling `login` from the current `frontend/src/hooks/useEmailPasswordAuth.tsx` no longer throws a JavaScript runtime error and returns a Motoko Result type with `Ok`/`Err` fields as expected by the frontend.",
+        "`validateSession` returns `Ok { userId; email }` for valid tokens and `Err` (or non-Ok) for invalid/expired tokens, matching the frontend restore-session logic.",
+        "`logout` invalidates the provided session token so subsequent `validateSession` calls fail for that token."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add backend session management for the custom auth system so the frontend can remain logged in across page refreshes using a backend-issued session token, with methods to get the current authenticated user from a token and to log out (invalidate the token).",
-      "target": "backend",
+      "text": "Ensure the Internet Identity login flow uses `mcubes.net` as the origin shown to users (instead of `caffeine.xyz`) by updating the frontend configuration used by `useInternetIdentity` (derivation origin) and any related deployment/environment configuration.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Yes signup allows and used for future login"
+          "use mcubes.net as Domain and hope it can change in future",
+          "Then let's use internet identity as default login and use own domain or canister means caffeine.xyz should not be visible"
         ]
       },
       "acceptanceCriteria": [
-        "Backend issues a unique session token on successful login.",
-        "Backend provides a method to validate a session token and return the associated user identity/profile data (at minimum: email and a user id).",
-        "Backend provides a logout/invalidate method so a token can be revoked.",
-        "Invalid/expired tokens do not authenticate the user and return a clear error result.",
-        "Session tokens are not derived directly from the password or stored password hash."
+        "Internet Identity login popup displays `mcubes.net` (or the mcubes.net origin) when users authenticate.",
+        "The app continues to function with Internet Identity after the domain change (actor creation in `frontend/src/hooks/useActor.ts` still succeeds after II login)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Replace the existing Internet Identity-based login modal UI with an email/password authentication modal that supports both signup and login, and integrate it into `frontend/src/components/TimerScreen.tsx` so it still (a) auto-opens on first visit for unauthenticated users and (b) can be opened via the existing header login icon.",
-      "target": "frontend",
+      "text": "Add support for changing the app domain in the future while preserving Internet Identity principals by configuring Internet Identity “alternative origins” and wiring the chosen derivation origin through the existing frontend config mechanism (used by `loadConfig()` / `config.ii_derivation_origin`).",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-recent-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Completely remove internet identity and yes otpless first",
-          "Then try using basic login method using email and pass",
-          "Yes."
+          "hope it can change in future"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/components/LoginModal.tsx` no longer prompts for Internet Identity and instead provides email + password inputs with clear actions for “Sign up” and “Log in”.",
-        "The first-visit behavior remains: on a fresh browser, unauthenticated users see the modal automatically once; dismissing it sets the existing localStorage flag (`wca-timer-first-visit-seen`).",
-        "The header login icon in `TimerScreen` opens the same modal on demand when the user is logged out.",
-        "All user-facing text in the modal is in English.",
-        "Form validation is present (e.g., required fields; basic email format; password minimum length)."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Implement a new frontend authentication state layer (new hook/provider) for email/password auth that stores the session token locally, exposes `signup`, `login`, and `logout` actions, and exposes `isAuthenticated` + current user info to the UI without relying on `useInternetIdentity` for application logic.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-recent-1"
-        ],
-        "quotes": [
-          "Completely remove internet identity",
-          "Then try using basic login method using email and pass"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A new auth hook/provider exists (new file(s)) that manages: current user (or null), auth status, loading/error states, and actions for signup/login/logout.",
-        "On successful login/signup, the session token is persisted in the browser (e.g., localStorage) and the app becomes authenticated without requiring Internet Identity.",
-        "On app load/refresh, if a token is present, the frontend attempts to validate it via the backend and restores authenticated state.",
-        "Logout clears the stored token and returns the UI to logged-out state.",
-        "No changes are requested to immutable files (`frontend/src/main.tsx`, `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`); the new auth layer is used by app components instead."
+        "Frontend config supports setting `ii_derivation_origin` to a stable value that can remain constant across future domain changes.",
+        "Project includes a clear, implemented configuration point for listing/using alternative origins so that moving from `mcubes.net` to a future domain does not change the user’s principal (when configured).",
+        "No changes are made to `frontend/src/hooks/useInternetIdentity.ts` beyond consuming the config it already loads (i.e., keep the immutable hook file intact if it is on the immutable list in this environment)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify immutable frontend paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
-    "Backend must remain a single Motoko actor in `backend/main.mo`; do not introduce additional backend services.",
-    "Do not integrate OTPless or any other third-party authentication provider.",
-    "Use English for any user-facing text."
+    "Backend must remain a single Motoko actor in `backend/main.mo` (single-actor architecture).",
+    "Do not edit any files under `frontend/src/components/ui` (read-only UI components).",
+    "Do not edit immutable frontend paths listed by the platform (e.g., `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`)—compose around them via configuration or new files if needed."
   ],
   "nonGoals": [
-    "Implementing OTPless authentication.",
-    "Integrating Internet Identity as a login option (the UI/flow should move to email/password).",
-    "Adding external databases or any non-Motoko backend dependencies.",
-    "Adding email verification, password reset via email, or multi-factor authentication."
+    "Hiding or masking the domain name inside the Internet Identity popup (not supported by the Internet Identity protocol).",
+    "Adding third-party authentication providers (Google/Facebook/GitHub/Auth0).",
+    "Implementing real-time features (WebSockets/push notifications)."
   ],
   "imageRequirements": {
     "required": [],
