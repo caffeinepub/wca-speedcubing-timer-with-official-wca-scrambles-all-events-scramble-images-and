@@ -1,68 +1,35 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T23:34:22.142Z",
+  "generatedAt": "2026-02-12T23:42:05.903Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Fix the inspection countdown so it visibly counts down from 15.00 to 0.00 during inspection after the user triggers inspection with a press-and-hold, and ensure the countdown continues updating every frame until inspection ends or the solve starts (no freezing at 15.00).",
+        "id": "REQ-5",
+        "summary": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts"
         ]
       },
       {
-        "id": "REQ-2",
-        "summary": "Implement the inspection warning behavior so that at 8 seconds remaining there is a warning, and when inspection reaches 5 seconds remaining it visibly shows \"5 sec\" and plays the 5-second warning sound; both warnings must reliably trigger once per inspection.",
+        "id": "REQ-6",
+        "summary": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx",
-          "frontend/src/lib/inspectionAudio.ts"
+          "frontend/src/hooks/useWcaTimerControls.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx",
-          "frontend/src/lib/inspectionAudio.ts"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Apply inspection penalty rules exactly as requested: inspection display counts down to 0.00 (not below), but starting the solve up to 2 seconds after inspection hits 0.00 results in a +2 penalty; starting after that results in DNF.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx",
-          "frontend/src/types/solves.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useWcaTimerControls.ts",
-          "frontend/src/components/TimerDisplay.tsx"
+          "frontend/src/hooks/useWcaTimerControls.ts"
         ]
       }
     ]
@@ -72,10 +39,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/TimerDisplay.tsx",
-    "frontend/src/components/TimerScreen.tsx",
     "frontend/src/hooks/useWcaTimerControls.ts",
-    "frontend/src/lib/inspectionAudio.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

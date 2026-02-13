@@ -3,51 +3,39 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [
-    "Timer interaction: touch-and-hold arms the timer; timer starts on release (not while holding).",
-    "Timer logic: countdown from 15 to 0; 8s warning and 5s warning (with sound). At 5 it should announce '5 sec'.",
-    "Result rules: 0 to -2 counts as +2; anything past -2 is DNF."
+    "Inspection timer state must be reset to 15s on solve completion, independent of prior pause/stop state."
   ],
   "known_issues": [
-    "Inspection/timer countdown not progressing after touch-and-hold release.",
-    "8-second and 5-second warning indicators/sounds not triggering as expected."
+    "Inspection timer does not reset after a solve if the user stops inspection mid-countdown; it should reset to 15s after each solve."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-inspection-countdown-so-it-visibly-counts-down-from-15-00-to-0-00-during-inspection-after-the-user-triggers-inspection-with-a-press-and-hold-and-ensure-the-countdown-continues-updating-every-frame-until-inspection-ends-or-the-solve-starts-no-freezing-at-15-00",
-      "title": "Fix the inspection countdown so it visibly counts down from 15.00 to 0.00 during inspection after the user triggers inspection with a press-and-hold, and ensure the countdown continues updating every frame until inspection ends or the solve starts (no freezing at 15.00).",
+      "id": "feature-reset-the-inspection-countdown-back-to-15-00-seconds-immediately-after-every-solve-is-completed-i-e-when-the-timer-transitions-into-the-stopped-state-regardless-of-what-the-inspection-countdown-value-was-previously",
+      "title": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
       "reqIds": [
-        "REQ-1"
+        "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-inspection-warning-behavior-so-that-at-8-seconds-remaining-there-is-a-warning-and-when-inspection-reaches-5-seconds-remaining-it-visibly-shows-5-sec-and-plays-the-5-second-warning-sound-both-warnings-must-reliably-trigger-once-per-inspection",
-      "title": "Implement the inspection warning behavior so that at 8 seconds remaining there is a warning, and when inspection reaches 5 seconds remaining it visibly shows \"5 sec\" and plays the 5-second warning sound; both warnings must reliably trigger once per inspection.",
+      "id": "feature-ensure-the-inspection-warning-state-is-also-reset-after-each-solve-completion-so-the-8-second-and-5-second-inspection-warnings-can-trigger-normally-on-the-next-inspection",
+      "title": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
       "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-touch-hold-and-spacebar-controls-follow-the-timer-starts-only-after-the-user-releases-not-while-holding-once-armed-during-inspection-holding-again-arms-and-releasing-starts-the-solve-timer",
-      "title": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-inspection-penalty-rules-exactly-as-requested-inspection-display-counts-down-to-0-00-not-below-but-starting-the-solve-up-to-2-seconds-after-inspection-hits-0-00-results-in-a-2-penalty-starting-after-that-results-in-dnf",
-      "title": "Apply inspection penalty rules exactly as requested: inspection display counts down to 0.00 (not below), but starting the solve up to 2 seconds after inspection hits 0.00 results in a +2 penalty; starting after that results in DNF.",
-      "reqIds": [
-        "REQ-4"
+        "REQ-6"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix WCA inspection countdown progression and 8s/5s warnings; ensure start-on-release and +2/DNF timing rules",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Reset inspection timer to 15 seconds after every solve event (even if inspection was stopped mid-countdown)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Reset inspection timer to 15 seconds after every solve",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

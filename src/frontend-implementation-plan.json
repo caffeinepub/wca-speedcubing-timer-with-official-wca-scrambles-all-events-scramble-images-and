@@ -1,100 +1,36 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "WCA inspection countdown + warnings reliability and start-on-release timing rules",
+  "title": "Reset inspection countdown and warnings after each solve",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Make inspection countdown animate smoothly from 15.00 to 0.00 with per-frame updates and no freeze, and stop updates when solve starts or inspection ends.",
+      "id": "REQ-5",
+      "summary": "Reset the inspection countdown state to 15.00s immediately when a solve completes (timer enters the \"stopped\" state), so the next inspection always starts from 15.00s.",
       "acceptanceCriteria": [
-        "On desktop (Space) and mobile (touch/pointer), starting inspection causes the displayed inspection time to decrease smoothly from ~15.00 down to 0.00 without getting stuck.",
-        "Inspection countdown updates are not dependent on stale React state (i.e., it continues animating reliably after state transitions).",
-        "Starting a solve from inspection stops the inspection countdown updates."
+        "Given an inspection is started and the countdown reaches any value (e.g., 11 seconds remaining), when the user completes a solve (timer stops and a result is recorded), the internal inspection countdown state is reset to exactly 15,000ms.",
+        "After a solve completes, starting the next inspection always begins from 15.00 seconds and does not resume from the previous inspection’s remaining time.",
+        "This behavior works for both Spacebar and touch/pointer interactions."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useWcaTimerControls.ts",
           "operation": "modify",
-          "description": "Refactor inspection countdown animation to use requestAnimationFrame driven by refs (not React state closures) so the countdown always updates each frame once inspection begins. Ensure the inspection RAF loop continues while inspection is active (including when the user is holding/armed during inspection), clamps displayed remaining time to 0.00, and is canceled/terminated immediately when the solve starts or inspection is reset."
-        },
-        {
-          "path": "frontend/src/components/TimerDisplay.tsx",
-          "operation": "modify",
-          "description": "Ensure the inspection time display renders centiseconds smoothly from the inspectionTime value provided by the timer controls, and that the UI correctly switches away from inspection display when the solve starts (no lingering inspection updates)."
+          "description": "Update the solve-completion logic (when transitioning into the \"stopped\" state) to immediately reset inspection countdown-related state back to 15,000ms (including any internal remaining-time tracking) so subsequent inspections always begin at 15.00s for both keyboard (Space) and pointer/touch flows."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Implement reliable single-fire 8s and 5s inspection warnings (sound + '5 sec' UI) that trigger on threshold crossing even with frame skips.",
+      "id": "REQ-6",
+      "summary": "Reset inspection warning state after each solve so 8s and 5s warnings can trigger normally on the next inspection only.",
       "acceptanceCriteria": [
-        "During inspection, exactly one 8-second warning sound plays when remaining time crosses 8 seconds.",
-        "During inspection, exactly one 5-second warning sound plays when remaining time crosses 5 seconds.",
-        "When remaining time is at/under 5 seconds (and inspection is still active), the timer UI shows an explicit \"5 sec\" warning text (in English).",
-        "Warnings trigger reliably even if the frame timing skips over narrow millisecond windows."
+        "After a solve completes, starting the next inspection can play the 8-second warning once and the 5-second warning once as the countdown crosses those thresholds, even if warnings were triggered during the previous inspection.",
+        "No inspection warning audio plays immediately upon solve completion; warnings only occur during a subsequent inspection countdown."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useWcaTimerControls.ts",
           "operation": "modify",
-          "description": "Replace narrow millisecond-window warning checks with robust threshold-crossing logic using a previousRemaining ref (e.g., prev > 8000 && remaining <= 8000) and one-shot refs for each warning. Ensure audio initialization is invoked on the first qualifying user gesture for inspection/arming so warning sounds can play reliably."
-        },
-        {
-          "path": "frontend/src/components/TimerDisplay.tsx",
-          "operation": "modify",
-          "description": "Add explicit \"5 sec\" warning text to the timer UI whenever inspection is still active and remaining time is <= 5 seconds (including if the user is currently armed/holding), without relying on brittle timing windows."
-        },
-        {
-          "path": "frontend/src/lib/inspectionAudio.ts",
-          "operation": "modify",
-          "description": "Harden Web Audio initialization/playback behavior so play*Warning methods remain no-ops until initialized, and initialization is resilient (e.g., resumes context when needed) to maximize reliability of 8s/5s warning sounds during inspection."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Enforce start-on-release controls for both Spacebar and pointer: arming happens on hold; solve starts only on release from armed; during inspection, hold to arm and release to start solve.",
-      "acceptanceCriteria": [
-        "While holding (armed), the solve timer does not increment.",
-        "On release from the armed state, the solve timer starts immediately and increments.",
-        "The same behavior works for both pointer (touch/mouse) and Spacebar input."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useWcaTimerControls.ts",
-          "operation": "modify",
-          "description": "Audit and adjust the state machine so that (1) the timer never transitions to running while input is held, (2) the only transition into running is on release from the armed state, and (3) during inspection a subsequent hold arms without stopping inspection countdown and release starts the solve immediately. Ensure parity between Spacebar and pointer handlers."
-        },
-        {
-          "path": "frontend/src/components/TimerScreen.tsx",
-          "operation": "modify",
-          "description": "Update any user-facing control instructions text if needed to accurately reflect the corrected start-on-release behavior for both desktop and mobile, matching the implemented control flow."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Apply inspection penalty timing rules: display clamps at 0.00; start within +2s after 0.00 => plus2; start later => dnf; and ensure recorded solves display '+' or 'DNF'.",
-      "acceptanceCriteria": [
-        "The inspection timer display never shows negative values; it clamps at 0.00 once inspection time has elapsed.",
-        "If the solve is started after inspection time is up but within 2 seconds of inspection reaching 0.00, the recorded solve has inspectionOutcome = \"plus2\" and history/stats display the time with a trailing \"+\".",
-        "If the solve is started more than 2 seconds after inspection reaches 0.00, the recorded solve has inspectionOutcome = \"dnf\" and displays as \"DNF\"."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useWcaTimerControls.ts",
-          "operation": "modify",
-          "description": "Implement inspection penalty computation based on the actual time elapsed since inspection started (or explicitly since the moment inspection hit 0.00 via a ref timestamp), while keeping the displayed countdown clamped to 0.00. Ensure the computed inspectionOutcome is captured at solve start, and that the outcome is plus2 only for (15s, 17s] and dnf for >17s."
-        },
-        {
-          "path": "frontend/src/components/TimerDisplay.tsx",
-          "operation": "modify",
-          "description": "Confirm final result rendering continues to display 'DNF' for dnf and appends '+' for plus2, consistent with the recorded inspectionOutcome."
-        },
-        {
-          "path": "frontend/src/types/solves.ts",
-          "operation": "modify",
-          "description": "Verify formatting helpers correctly represent +2 as a trailing '+' (and apply +2000ms only for numeric calculations) and DNF as 'DNF', aligning history/stats display with the updated inspectionOutcome rules."
+          "description": "Ensure that when a solve completes (timer enters \"stopped\"), the internal inspection warning flags/state are cleared (so 8s/5s warnings can fire again on the next inspection), without triggering any warning audio during the stop transition."
         }
       ]
     }

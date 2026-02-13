@@ -2,7 +2,7 @@
   "frontend/src/App.tsx": "Main application component that wraps TimerScreen with ThemeProvider for dark mode support.",
   "frontend/src/lib/wcaEvents.ts": "Defines all official WCA events with their IDs, display names, and scramble event mappings.",
   "frontend/src/hooks/useWcaScramble.ts": "Scramble generation hook extended to support initial scramble restoration from cookies while maintaining CDN-based generation.",
-  "frontend/src/hooks/useWcaTimerControls.ts": "Extended timer state machine with robust inspection countdown using RAF driven by refs, threshold-crossing warning logic, start-on-release controls for both keyboard and pointer, and proper inspection penalty timing (0-2s = +2, >2s = DNF).",
+  "frontend/src/hooks/useWcaTimerControls.ts": "Extended timer state machine with robust inspection countdown using RAF driven by refs, threshold-crossing warning logic, start-on-release controls for both keyboard and pointer, proper inspection penalty timing (0-2s = +2, >2s = DNF), and automatic inspection state reset (countdown and warnings) after each solve completes.",
   "frontend/src/components/TimerScreen.tsx": "Main screen orchestrating WCA timer with inspection, solve recording, auto-scramble refresh, session stats, solve history, cookie persistence, and updated footer with attribution.",
   "frontend/src/components/EventSelector.tsx": "Dropdown selector component for choosing WCA events, disabled during active solves.",
   "frontend/src/components/ScramblePanel.tsx": "Card component displaying the current scramble text with a refresh button to generate new scrambles.",

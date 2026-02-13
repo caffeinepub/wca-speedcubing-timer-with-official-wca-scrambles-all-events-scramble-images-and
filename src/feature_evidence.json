@@ -2,10 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-inspection-countdown-so-it-visibly-counts-down-from-15-00-to-0-00-during-inspection-after-the-user-triggers-inspection-with-a-press-and-hold-and-ensure-the-countdown-continues-updating-every-frame-until-inspection-ends-or-the-solve-starts-no-freezing-at-15-00",
-      "featureTitle": "Fix the inspection countdown so it visibly counts down from 15.00 to 0.00 during inspection after the user triggers inspection with a press-and-hold, and ensure the countdown continues updating every frame until inspection ends or the solve starts (no freezing at 15.00).",
+      "featureId": "feature-reset-the-inspection-countdown-back-to-15-00-seconds-immediately-after-every-solve-is-completed-i-e-when-the-timer-transitions-into-the-stopped-state-regardless-of-what-the-inspection-countdown-value-was-previously",
+      "featureTitle": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (i.e., when the timer transitions into the \"stopped\" state), regardless of what the inspection countdown value was previously.",
       "files": [
-        "frontend/src/components/TimerDisplay.tsx",
         "frontend/src/hooks/useWcaTimerControls.ts"
       ],
       "components": [
@@ -16,35 +15,14 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-5"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-the-inspection-warning-behavior-so-that-at-8-seconds-remaining-there-is-a-warning-and-when-inspection-reaches-5-seconds-remaining-it-visibly-shows-5-sec-and-plays-the-5-second-warning-sound-both-warnings-must-reliably-trigger-once-per-inspection",
-      "featureTitle": "Implement the inspection warning behavior so that at 8 seconds remaining there is a warning, and when inspection reaches 5 seconds remaining it visibly shows \"5 sec\" and plays the 5-second warning sound; both warnings must reliably trigger once per inspection.",
+      "featureId": "feature-ensure-the-inspection-warning-state-is-also-reset-after-each-solve-completion-so-the-8-second-and-5-second-inspection-warnings-can-trigger-normally-on-the-next-inspection",
+      "featureTitle": "Ensure the inspection-warning state is also reset after each solve completion so the 8-second and 5-second inspection warnings can trigger normally on the next inspection.",
       "files": [
-        "frontend/src/components/TimerDisplay.tsx",
-        "frontend/src/hooks/useWcaTimerControls.ts",
-        "frontend/src/lib/inspectionAudio.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-touch-hold-and-spacebar-controls-follow-the-timer-starts-only-after-the-user-releases-not-while-holding-once-armed-during-inspection-holding-again-arms-and-releasing-starts-the-solve-timer",
-      "featureTitle": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
-      "files": [
-        "frontend/src/components/TimerScreen.tsx",
         "frontend/src/hooks/useWcaTimerControls.ts"
       ],
       "components": [
@@ -55,26 +33,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-inspection-penalty-rules-exactly-as-requested-inspection-display-counts-down-to-0-00-not-below-but-starting-the-solve-up-to-2-seconds-after-inspection-hits-0-00-results-in-a-2-penalty-starting-after-that-results-in-dnf",
-      "featureTitle": "Apply inspection penalty rules exactly as requested: inspection display counts down to 0.00 (not below), but starting the solve up to 2 seconds after inspection hits 0.00 results in a +2 penalty; starting after that results in DNF.",
-      "files": [
-        "frontend/src/components/TimerDisplay.tsx",
-        "frontend/src/hooks/useWcaTimerControls.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
+        "REQ-6"
       ],
       "confidence": "high"
     }

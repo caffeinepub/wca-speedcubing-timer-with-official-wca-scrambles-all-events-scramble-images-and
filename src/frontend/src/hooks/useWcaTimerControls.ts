@@ -134,6 +134,12 @@ export function useWcaTimerControls() {
       inspectionOutcome,
     });
     setState('stopped');
+    
+    // Reset inspection state after solve completes
+    setInspectionTime(15000);
+    previousRemainingRef.current = 15000;
+    has8SecondWarningRef.current = false;
+    has5SecondWarningRef.current = false;
   }, [time]);
 
   const armTimer = useCallback(() => {

@@ -1,66 +1,46 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T23:34:22.139Z",
-  "summary": "REQ-1 and REQ-2 appear implemented via a ref-driven RAF inspection countdown with threshold-crossing warning beeps and a UI \"5 sec\" indicator. REQ-3 and parts of REQ-4 cannot be fully verified from the provided diff excerpts because the relevant control/penalty logic is truncated.",
+  "generatedAt": "2026-02-12T23:42:05.900Z",
+  "summary": "The diff shows inspection countdown and warning refs being reset when starting a new inspection, but the provided truncated hook snippet does not show an explicit reset occurring on solve completion / transition to the \"stopped\" state. Additionally, non-requested meta/project-tracking files were modified.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Ensure touch/hold and Spacebar controls follow: the timer starts only after the user releases (not while holding) once armed; during inspection, holding again arms and releasing starts the solve timer.",
-      "reason": "The diff excerpt for the control hook does not include the pointer/keyboard event handlers or the armed→running transition conditions, so start-on-release behavior for both pointer and Spacebar cannot be confirmed from the provided evidence.",
+      "id": "REQ-5",
+      "requirement": "Reset the inspection countdown back to 15.00 seconds immediately after every solve is completed (timer transitions to \"stopped\"), regardless of prior inspection countdown value.",
+      "reason": "In the visible diff, inspectionTime is reset in startInspection(), but there is no shown logic that resets inspectionTime to exactly 15000ms at solve completion / when state becomes \"stopped\". Since the file is truncated, this behavior cannot be verified from the provided evidence.",
       "evidence": [
-        "frontend/src/hooks/useWcaTimerControls.ts (truncated)"
+        "frontend/src/hooks/useWcaTimerControls.ts (truncated): shows setInspectionTime(15000) inside startInspection(), but no shown reset on \"stopped\" transition."
       ]
     },
     {
-      "id": "REQ-4",
-      "requirement": "Apply inspection penalty rules: start up to 2s after inspection hits 0.00 => +2; after that => DNF, and record/display accordingly.",
-      "reason": "The penalty assignment logic in startTimer is truncated right after the DNF branch (inspectionElapsed > 17000) and begins an incomplete conditional for the +2 case, so the exact +2 window and recorded outcome rules cannot be fully verified from the provided evidence.",
+      "id": "REQ-6",
+      "requirement": "Reset inspection-warning state after each solve completion so 8s and 5s warnings can trigger normally on the next inspection, without playing immediately on solve completion.",
+      "reason": "In the visible diff, warning flags are reset in startInspection(), but there is no shown logic that resets warning state at solve completion / on transition to \"stopped\" (and ensures no warning audio plays immediately upon solve completion). This cannot be confirmed from the truncated snippet.",
       "evidence": [
-        "frontend/src/hooks/useWcaTimerControls.ts (truncated)",
-        "frontend/src/components/TimerDisplay.tsx"
+        "frontend/src/hooks/useWcaTimerControls.ts (truncated): has8SecondWarningRef/has5SecondWarningRef are set false in startInspection(), but no shown reset on solve completion."
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Session persistence via cookies (saving/loading event, scramble, solves).",
-      "reason": "Not requested by any requirement (REQ-1..REQ-4 focus only on inspection countdown, warnings, controls, and penalty rules).",
+      "description": "Modified project tracking/metadata files (project_state.json) to add new_feature_requests entries AR-1..AR-3.",
+      "reason": "The BuildRequest does not request any changes to project tracking metadata; it only specifies frontend timer behavior changes.",
       "evidence": [
-        "frontend/src/components/TimerScreen.tsx",
-        "frontend-file-summaries.txt (frontend/src/lib/sessionCookie.ts)"
+        "project_state.json"
       ]
     },
     {
-      "description": "Scramble visualizer and CDN-based cubing.js TwistyPlayer integration and related build/config changes (removing cubing package, Vite/TS config updates, type declarations).",
-      "reason": "Not requested; also outside the scope of the inspection/countdown/control/penalty fixes.",
+      "description": "Modified frontend-file-summaries.txt content.",
+      "reason": "The BuildRequest does not request updating repository documentation/summary files; it only requests functional changes to the inspection reset behavior.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/components/ScrambleVisualizer.tsx, frontend/package.json, frontend/vite.config.js, frontend/tsconfig.json, frontend/src/types/cubing.d.ts)"
-      ]
-    },
-    {
-      "description": "UI/theme styling changes including new timer-specific Tailwind color tokens and global orange/amber theme updates.",
-      "reason": "Not requested by REQ-1..REQ-4.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/index.css, frontend/tailwind.config.js)",
-        "frontend/src/components/TimerDisplay.tsx"
-      ]
-    },
-    {
-      "description": "Header/footer/attribution UI changes (e.g., GitHub link, icons).",
-      "reason": "Not requested by REQ-1..REQ-4.",
-      "evidence": [
-        "frontend/src/components/TimerScreen.tsx"
+        "frontend-file-summaries.txt"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/TimerDisplay.tsx",
-    "frontend/src/components/TimerScreen.tsx",
     "frontend/src/hooks/useWcaTimerControls.ts",
-    "frontend/src/lib/inspectionAudio.ts",
     "project_state.json"
   ]
 }
