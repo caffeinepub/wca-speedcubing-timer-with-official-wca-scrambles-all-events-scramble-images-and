@@ -1,62 +1,180 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-13T01:53:22.753Z",
+  "generatedAt": "2026-02-14T08:40:58.283Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 2,
+    "total": 9,
+    "implemented": 8,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the Motoko backend email/password authentication API so the actor exposes `signup`, `login`, `validateSession`, and `logout` methods with stable, structured return types compatible with the frontend’s expectations (i.e., Result-style responses that include a session token and user info on success, and an error message on failure).",
+        "summary": "Remove all login/signup/authentication functionality from the frontend UI so the app is fully usable without any login, including removing or disabling the Login modal, Account modal, and any header/account controls that depend on authentication state.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/main.tsx",
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/LoginModal.tsx",
+          "frontend/src/components/AccountModal.tsx",
+          "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "frontend/src/hooks/useFirstVisitLoginPrompt.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/LoginModal.tsx",
+          "frontend/src/components/AccountModal.tsx",
+          "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "frontend/src/hooks/useFirstVisitLoginPrompt.ts"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Remove all email/password authentication logic from the backend canister interface (signup/login/logout/profile session behavior) so the backend no longer exposes or depends on email/password auth for core app usage.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-2",
-        "summary": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
+        "id": "REQ-3",
+        "summary": "Add a new Practice Session feature accessible from the main UI (alongside the existing timer experience), with a dedicated entry point labeled “Practice” (English UI text).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useEmailPasswordAuth.tsx",
-          "frontend/src/components/LoginModal.tsx"
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useEmailPasswordAuth.tsx",
-          "frontend/src/components/LoginModal.tsx"
+          "frontend/src/components/TimerScreen.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
         ]
       },
       {
-        "id": "REQ-3",
-        "summary": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
+        "id": "REQ-4",
+        "summary": "On the Practice page, fetch and display the list of upcoming WCA competitions from the official WCA API, and render them in a scrollable list with competition name and location metadata when available.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/useEmailPasswordAuth.tsx"
+          "frontend/src/hooks/useWcaUpcomingCompetitions.ts",
+          "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/useEmailPasswordAuth.tsx"
+          "frontend/src/hooks/useWcaUpcomingCompetitions.ts",
+          "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Provide filtering on the Practice competitions list: (1) filter by country and (2) search by competition name or country name (case-insensitive).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/wcaCountries.ts",
+          "frontend/src/components/practice/PracticeBrowseCompetitions.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/lib/wcaCountries.ts",
+          "frontend/src/components/practice/PracticeBrowseCompetitions.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "After a competition is selected, display its available events and allow the user to select an event to practice.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useWcaCompetitionDetails.ts",
+          "frontend/src/components/practice/PracticeSelectEvent.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useWcaCompetitionDetails.ts",
+          "frontend/src/components/practice/PracticeSelectEvent.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "On the Practice “ready” page, generate and display 5 random WCA-standard scrambles for the selected event, matching the “Scramble 1/5” style shown in the uploaded reference images.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/usePracticeScrambles.ts",
+          "frontend/src/components/practice/PracticeReady.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/usePracticeScrambles.ts",
+          "frontend/src/components/practice/PracticeReady.tsx",
+          "frontend/src/components/practice/PracticeScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Persist Practice Session state in the browser only (no canister persistence): at minimum save the selected competition, selected event, generated 5 scrambles, and the user’s current scramble index so that a refresh restores the session.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/usePracticeSessionPersistence.ts",
+          "frontend/src/components/practice/PracticeScreen.tsx",
+          "frontend/src/components/practice/PracticeReady.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/usePracticeSessionPersistence.ts",
+          "frontend/src/components/practice/PracticeScreen.tsx",
+          "frontend/src/components/practice/PracticeReady.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Apply a coherent dark, competition-focused visual theme consistent across the new Practice flow screens (browse competitions, select event, ready page), using a charcoal/graphite base with high-contrast accents (avoid blue & purple).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/practice/PracticeScreen.tsx",
+          "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "frontend/src/components/practice/PracticeSelectEvent.tsx",
+          "frontend/src/components/practice/PracticeReady.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/practice/PracticeScreen.tsx",
+          "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "frontend/src/components/practice/PracticeSelectEvent.tsx",
+          "frontend/src/components/practice/PracticeReady.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/AccountModal.tsx",
     "frontend/src/components/LoginModal.tsx",
+    "frontend/src/components/TimerScreen.tsx",
+    "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+    "frontend/src/components/practice/PracticeReady.tsx",
+    "frontend/src/components/practice/PracticeScreen.tsx",
+    "frontend/src/components/practice/PracticeSelectEvent.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useEmailPasswordAuth.tsx",
+    "frontend/src/hooks/useFirstVisitLoginPrompt.ts",
+    "frontend/src/hooks/usePracticeScrambles.ts",
+    "frontend/src/hooks/usePracticeSessionPersistence.ts",
+    "frontend/src/hooks/useWcaCompetitionDetails.ts",
+    "frontend/src/hooks/useWcaUpcomingCompetitions.ts",
+    "frontend/src/index.css",
+    "frontend/src/lib/wcaCountries.ts",
+    "frontend/src/types/cubing-cdn.d.ts",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

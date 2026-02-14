@@ -2,11 +2,15 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-react-email-password-auth-hook-to-match-the-backend-s-actual-return-types-for-signup-login-validatesession-and-logout-and-ensure-all-failures-surface-a-user-visible-error-in-the-login-signup-modal-no-silent-failures",
-      "featureTitle": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
+      "featureId": "feature-remove-all-login-signup-authentication-functionality-from-the-frontend-ui-so-the-app-is-fully-usable-without-any-login-including-removing-or-disabling-the-login-modal-account-modal-and-any-header-account-controls-that-depend-on-authentication-state",
+      "featureTitle": "Remove all login/signup/authentication functionality from the frontend UI so the app is fully usable without any login, including removing or disabling the Login modal, Account modal, and any header/account controls that depend on authentication state.",
       "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AccountModal.tsx",
         "frontend/src/components/LoginModal.tsx",
-        "frontend/src/hooks/useEmailPasswordAuth.tsx"
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/hooks/useEmailPasswordAuth.tsx",
+        "frontend/src/hooks/useFirstVisitLoginPrompt.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,15 +21,16 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-regenerate-update-the-frontend-backend-actor-type-declarations-so-the-compiled-frontend-actor-type-includes-the-newly-supported-signup-login-validatesession-and-logout-methods-eliminating-runtime-mismatches-between-declared-and-deployed-canister-interfaces",
-      "featureTitle": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
+      "featureId": "feature-add-a-new-practice-session-feature-accessible-from-the-main-ui-alongside-the-existing-timer-experience-with-a-dedicated-entry-point-labeled-practice-english-ui-text",
+      "featureTitle": "Add a new Practice Session feature accessible from the main UI (alongside the existing timer experience), with a dedicated entry point labeled “Practice” (English UI text).",
       "files": [
-        "frontend/src/hooks/useEmailPasswordAuth.tsx"
+        "frontend/src/components/TimerScreen.tsx",
+        "frontend/src/components/practice/PracticeScreen.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -37,6 +42,133 @@
       ],
       "testIds": [
         "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-practice-page-fetch-and-display-the-list-of-upcoming-wca-competitions-from-the-official-wca-api-and-render-them-in-a-scrollable-list-with-competition-name-and-location-metadata-when-available",
+      "featureTitle": "On the Practice page, fetch and display the list of upcoming WCA competitions from the official WCA API, and render them in a scrollable list with competition name and location metadata when available.",
+      "files": [
+        "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+        "frontend/src/components/practice/PracticeScreen.tsx",
+        "frontend/src/hooks/useWcaUpcomingCompetitions.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-filtering-on-the-practice-competitions-list-1-filter-by-country-and-2-search-by-competition-name-or-country-name-case-insensitive",
+      "featureTitle": "Provide filtering on the Practice competitions list: (1) filter by country and (2) search by competition name or country name (case-insensitive).",
+      "files": [
+        "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+        "frontend/src/lib/wcaCountries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-a-competition-is-selected-display-its-available-events-and-allow-the-user-to-select-an-event-to-practice",
+      "featureTitle": "After a competition is selected, display its available events and allow the user to select an event to practice.",
+      "files": [
+        "frontend/src/components/practice/PracticeScreen.tsx",
+        "frontend/src/components/practice/PracticeSelectEvent.tsx",
+        "frontend/src/hooks/useWcaCompetitionDetails.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-practice-ready-page-generate-and-display-5-random-wca-standard-scrambles-for-the-selected-event-matching-the-scramble-1-5-style-shown-in-the-uploaded-reference-images",
+      "featureTitle": "On the Practice “ready” page, generate and display 5 random WCA-standard scrambles for the selected event, matching the “Scramble 1/5” style shown in the uploaded reference images.",
+      "files": [
+        "frontend/src/components/practice/PracticeReady.tsx",
+        "frontend/src/components/practice/PracticeScreen.tsx",
+        "frontend/src/hooks/usePracticeScrambles.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-persist-practice-session-state-in-the-browser-only-no-canister-persistence-at-minimum-save-the-selected-competition-selected-event-generated-5-scrambles-and-the-user-s-current-scramble-index-so-that-a-refresh-restores-the-session",
+      "featureTitle": "Persist Practice Session state in the browser only (no canister persistence): at minimum save the selected competition, selected event, generated 5 scrambles, and the user’s current scramble index so that a refresh restores the session.",
+      "files": [
+        "frontend/src/components/practice/PracticeReady.tsx",
+        "frontend/src/components/practice/PracticeScreen.tsx",
+        "frontend/src/hooks/usePracticeSessionPersistence.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-coherent-dark-competition-focused-visual-theme-consistent-across-the-new-practice-flow-screens-browse-competitions-select-event-ready-page-using-a-charcoal-graphite-base-with-high-contrast-accents-avoid-blue-purple",
+      "featureTitle": "Apply a coherent dark, competition-focused visual theme consistent across the new Practice flow screens (browse competitions, select event, ready page), using a charcoal/graphite base with high-contrast accents (avoid blue & purple).",
+      "files": [
+        "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+        "frontend/src/components/practice/PracticeReady.tsx",
+        "frontend/src/components/practice/PracticeScreen.tsx",
+        "frontend/src/components/practice/PracticeSelectEvent.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
       ],
       "confidence": "high"
     }

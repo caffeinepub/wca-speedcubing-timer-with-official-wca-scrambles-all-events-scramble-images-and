@@ -1,47 +1,231 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Align React email/password auth hook with backend actor auth methods and regenerated types",
+  "title": "Unauthenticated timer + WCA competition-based Practice flow (WCA API, 5 scrambles, browser persistence)",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Update the email/password auth hook to use the backend actor’s actual auth return types and ensure all failures are surfaced in the login/signup modal (no silent failures).",
+      "id": "REQ-1",
+      "summary": "Remove all login/signup/authentication UI and runtime references to email/password auth so the app is fully usable without login.",
       "acceptanceCriteria": [
-        "Clicking “Sign Up” shows a loading state immediately and then either authenticates the user (closing the modal) or displays a readable error message inside the modal.",
-        "If the backend call throws (network/canister error), the error is caught and shown in the modal rather than failing silently.",
-        "Session restoration on page load uses `validateSession` and correctly sets authenticated state when the stored token is valid; invalid tokens are removed from localStorage.",
-        "No uncaught exceptions are produced in the browser console during signup/login/restore flows."
+        "The app has no visible Login/Sign Up entry points (no Login button, no auth dropdown, no auth modals).",
+        "Timer-related features (event select, scramble, timer, stats, solve history) work without any authentication state.",
+        "No frontend code references the email/password auth hook/provider in runtime paths (build compiles cleanly)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Replace the current `Ok/Err`-style parsing and `any` actor calls with parsing for the declared `SignupResult`/`LoginResult` (`__kind__: 'success' | 'failure'`) and `SessionValidationResult` (`isValid` + optional `user/session`). Ensure: (1) restore flow calls `validateSession` and clears localStorage on invalid/expired tokens, (2) signup/login failures always set a readable `error` state, (3) thrown exceptions are caught and mapped to user-visible errors, (4) logout clears local token and user state even if the backend call fails."
+          "description": "Remove EmailPasswordAuthProvider wrapper so the app renders without email/password auth context."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Remove InternetIdentityProvider wrapper (no login UX required) and keep only the minimal app providers needed for the timer/practice UI."
+        },
+        {
+          "path": "frontend/src/components/TimerScreen.tsx",
+          "operation": "modify",
+          "description": "Remove all authentication-dependent header controls and flows: Login/Account modals, auth dropdown, logout/query cache clearing, and any useEmailPasswordAuth usage; keep timer features working without auth."
         },
         {
           "path": "frontend/src/components/LoginModal.tsx",
-          "operation": "modify",
-          "description": "Ensure the modal always displays hook-provided errors (including thrown-call errors) and never fails silently. Clear prior validation/UI error state on submit, keep the existing loading/disabled behavior, and ensure failed signup/login results render a readable message inside the modal."
+          "operation": "delete",
+          "description": "Delete the Login modal implementation since login/signup is being removed."
+        },
+        {
+          "path": "frontend/src/components/AccountModal.tsx",
+          "operation": "delete",
+          "description": "Delete the Account modal implementation since account/profile management is being removed."
+        },
+        {
+          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "operation": "delete",
+          "description": "Delete the email/password auth provider/hook to ensure no runtime references remain."
+        },
+        {
+          "path": "frontend/src/hooks/useFirstVisitLoginPrompt.ts",
+          "operation": "delete",
+          "description": "Delete first-visit login prompt logic since login is being removed."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Update frontend actor type declarations so the compiled actor type includes `signup`, `login`, `validateSession`, and `logout` and remove runtime/type mismatches.",
+      "summary": "Add a dedicated “Practice” entry point alongside the existing timer experience, accessible without login.",
       "acceptanceCriteria": [
-        "Frontend build output includes the auth methods on the actor instance created by `createActorWithConfig`.",
-        "Manual test: opening the signup modal and submitting valid inputs performs a canister call (visible in network/agent logs) rather than failing due to missing methods."
+        "A user can navigate to a “Practice” area from within the app without logging in.",
+        "Navigation does not rely on modifying any immutable frontend paths listed in SYSTEM_CONTEXT."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/backend.d.ts",
+          "path": "frontend/src/components/TimerScreen.tsx",
           "operation": "modify",
-          "description": "Regenerate/align the frontend canister type declarations so `backendInterface` accurately includes `signup`, `login`, `validateSession`, and `logout` with the structured return types expected by the frontend. This file should be the source of truth used by TypeScript during build to prevent missing-method runtime mismatches."
+          "description": "Add an in-app navigation control that toggles between the Timer and the new Practice area, with an English label “Practice”. Use shadcn-ui components (e.g., Button, Card) for the navigation UI; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/hooks/useEmailPasswordAuth.tsx",
+          "path": "frontend/src/components/practice/PracticeScreen.tsx",
+          "operation": "create",
+          "description": "Create a PracticeScreen container that hosts the Practice flow screens (browse competitions → select event → ready). Use shadcn-ui components for layout consistency; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Fetch and display upcoming WCA competitions from the official WCA API with loading/error states and selectable list items.",
+      "acceptanceCriteria": [
+        "Upcoming competitions are fetched client-side from the official WCA API over HTTPS.",
+        "A loading state and an error state are shown if the request is in progress or fails.",
+        "Competitions render as a list; selecting a competition advances to the next step."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useWcaUpcomingCompetitions.ts",
+          "operation": "create",
+          "description": "Implement a client-side fetch hook for upcoming competitions from the official WCA API over HTTPS, exposing data + loading + error states."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "operation": "create",
+          "description": "Create the Practice browse view that calls the WCA competitions hook and renders a scrollable list of competitions with name and location metadata when available, including loading and error UI. Use shadcn-ui components (e.g., Card, Button, Input) to match the app styling; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeScreen.tsx",
           "operation": "modify",
-          "description": "Remove `(actor as any)` usage and rely on the typed actor interface from the generated declarations (via the actor returned by `useActor`). This forces compile-time alignment with the regenerated declarations and prevents calling non-existent methods at runtime."
+          "description": "Wire the browse competitions view as the first step of the Practice flow and advance the flow state when a competition is selected."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add country filter and case-insensitive search on competition name/country for the upcoming competitions list, with a clear/reset option.",
+      "acceptanceCriteria": [
+        "A user can restrict the list to a chosen country (via dropdown or equivalent).",
+        "A user can type a query that filters by competition name or country name.",
+        "Filters can be cleared to return to the full upcoming list."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/wcaCountries.ts",
+          "operation": "create",
+          "description": "Add utilities to derive displayable country names (e.g., via Intl.DisplayNames) from WCA API country codes and to support consistent country filtering/search."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "operation": "modify",
+          "description": "Add UI controls for (1) country selection and (2) search query; implement case-insensitive filtering by competition name and country name; add a clear/reset action to restore the full list. Use shadcn-ui components where appropriate (e.g., Input, Button, Card); verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "After selecting a competition, show its available events and allow selecting an event to practice.",
+      "acceptanceCriteria": [
+        "Selected competition view shows a list/grid of events for that competition.",
+        "Selecting an event advances to a “ready”/practice session screen for that competition+event."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useWcaCompetitionDetails.ts",
+          "operation": "create",
+          "description": "Implement a client-side fetch hook that retrieves a selected competition’s details from the official WCA API (including event identifiers) with loading/error support."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeSelectEvent.tsx",
+          "operation": "create",
+          "description": "Create the competition detail step that displays competition summary + an events list/grid derived from WCA competition details and the app’s WCA events metadata, and allows selecting an event. Use shadcn-ui components for cards/buttons; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeScreen.tsx",
+          "operation": "modify",
+          "description": "Wire the event selection step as the second step of the Practice flow, with back navigation to the competitions list and forward navigation to the ready screen after event selection."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "On the Practice ready screen, generate and display exactly 5 random WCA-standard scrambles for the selected event with a “Scramble 1/5” indicator and navigation.",
+      "acceptanceCriteria": [
+        "Exactly 5 scrambles are generated for the selected event and displayed to the user.",
+        "The UI indicates the current scramble index (e.g., “Scramble 1/5”).",
+        "A user can move through the set of 5 scrambles (next/previous or equivalent) without regenerating the entire set unless they explicitly refresh/regenerate."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/usePracticeScrambles.ts",
+          "operation": "create",
+          "description": "Create a hook to generate a set of exactly 5 random scrambles for a given WCA event using the existing cubing.js CDN approach, and expose current index + navigation + explicit regenerate."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeReady.tsx",
+          "operation": "create",
+          "description": "Create the ready screen UI that shows “Scramble X/5”, the current scramble text, next/previous controls, and an explicit regenerate action. Use shadcn-ui components (e.g., Card, Button) and optionally reuse existing scramble display patterns; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeScreen.tsx",
+          "operation": "modify",
+          "description": "Wire the ready screen as the third step of the Practice flow and ensure it receives the selected competition+event and uses the 5-scramble set without unintended regeneration during navigation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Persist Practice Session state in browser-only storage and restore it on refresh, with a UI control to clear/reset the saved session.",
+      "acceptanceCriteria": [
+        "Practice session state is restored after a page refresh in the same browser.",
+        "No backend calls are used to store practice session state.",
+        "There is a clear way for the user to reset/clear the saved practice session state from the UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/usePracticeSessionPersistence.ts",
+          "operation": "create",
+          "description": "Implement browser-only persistence (localStorage) for selected competition, selected event, generated 5 scrambles, and current scramble index; provide load/save/clear helpers and validation."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeScreen.tsx",
+          "operation": "modify",
+          "description": "Integrate persistence hook so Practice flow state restores on mount/refresh and updates persistence when competition/event/scrambles/index change; add a visible “Reset/Clear Practice Session” control."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeReady.tsx",
+          "operation": "modify",
+          "description": "Ensure scramble navigation updates the persisted current scramble index and that explicit regenerate updates the persisted 5-scramble set."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Apply a consistent dark, competition-focused (non-blue/non-purple) theme across Practice flow screens with English UI text.",
+      "acceptanceCriteria": [
+        "Practice pages share a consistent layout system (spacing, cards, typography) with the existing app styling.",
+        "Theme uses a dark base with non-blue/non-purple accent colors consistently applied to interactive elements and highlights.",
+        "All user-facing text for the Practice feature is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add a scoped Practice theme class (e.g., a wrapper class that overrides relevant CSS variables) using a charcoal/graphite base and non-blue/non-purple accents (e.g., amber/orange/green/red), without disrupting the existing timer theme."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeScreen.tsx",
+          "operation": "modify",
+          "description": "Wrap Practice flow screens in the scoped Practice theme class and standardize layout (headers, card spacing, typography) across browse/select/ready. Use shadcn-ui components for consistent dark UI patterns; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+          "operation": "modify",
+          "description": "Ensure competition list visuals (cards, hover/selected states, scroll area) follow the new Practice theme and keep all Practice UI strings in English. Use shadcn-ui components where applicable; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeSelectEvent.tsx",
+          "operation": "modify",
+          "description": "Ensure event grid visuals and selection states follow the Practice theme with non-blue/non-purple accents and English UI text. Use shadcn-ui components where applicable; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/practice/PracticeReady.tsx",
+          "operation": "modify",
+          "description": "Ensure ready screen visuals match the Practice theme (scramble card, index badge/label, navigation buttons) and keep all text in English. Use shadcn-ui components where applicable; verify the component's usage instructions before implementing."
         }
       ]
     }

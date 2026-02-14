@@ -1,33 +1,87 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-13T01:53:22.750Z",
-  "summary": "Auth alignment work is partially evidenced: backend adds Result-style types and a `signup` method; frontend updates `useEmailPasswordAuth` and `LoginModal` to call `signup/login/validateSession` and surface errors. However, the diff does not provide evidence that all required backend methods (`login`, `validateSession`, `logout`) are implemented/exported, nor that the generated frontend backend-actor type declarations were regenerated/updated to include these methods.",
+  "generatedAt": "2026-02-14T08:40:58.279Z",
+  "summary": "The diff adds a new WCA competition-based Practice flow (browse/filter competitions, select event, ready screen with 5 scrambles) and updates styling/theme variables. Backend auth endpoints appear removed, but frontend auth removal is not clearly complete, practice-session persistence does not appear to fully restore scrambles/index after refresh, and the new dark theme base uses a purple/blue-leaning hue rather than charcoal/graphite.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Backend canister must export callable methods named `signup`, `login`, `validateSession`, and `logout` with structured Result-style return types and proper session invalidation.",
-      "reason": "The diff snippet for `backend/main.mo` shows new types and the `signup` method, but does not show any implementation/export of `login`, `validateSession`, or `logout` (file content is truncated). Without explicit evidence of these methods, the requirement cannot be confirmed as implemented.",
+      "requirement": "Remove all login/signup/authentication functionality from the frontend UI so the app is fully usable without any login, including removing or disabling the Login modal, Account modal, and any header/account controls that depend on authentication state; and ensure no runtime references to the email/password auth hook/provider.",
+      "reason": "Login/auth-related components and hooks are still present/modified in the diff, which suggests authentication UI and/or runtime paths may still exist. The diff summary does not provide evidence they were fully removed/disabled or that all runtime references were eliminated.",
       "evidence": [
-        "backend/main.mo (truncated; shows `signup` and result types but not `login`/`validateSession`/`logout`)"
+        "frontend/src/components/LoginModal.tsx",
+        "frontend/src/components/AccountModal.tsx",
+        "frontend/src/hooks/useEmailPasswordAuth.tsx",
+        "frontend/src/hooks/useFirstVisitLoginPrompt.ts"
       ]
     },
     {
-      "id": "REQ-3",
-      "requirement": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes `signup`, `login`, `validateSession`, and `logout`.",
-      "reason": "No modified files in the diff summary appear to be the generated canister interface/type declaration files (e.g., declarations/did bindings). The hook casts `actor as backendInterface`, but there is no evidence that `backendInterface` itself was updated/regenerated to include the required methods.",
+      "id": "REQ-8",
+      "requirement": "Persist Practice Session state in the browser only (selected competition, selected event, generated 5 scrambles, and current scramble index) so refresh restores the session; no backend storage; provide a clear reset/clear UI.",
+      "reason": "Although localStorage persistence is added, the ready screen always generates scrambles from scratch via usePracticeScrambles and does not appear to initialize from persisted scrambles/currentIndex. Also, when scrambles change it saves currentIndex=0, which would overwrite a previously persisted index. This prevents reliably restoring the exact same 5 scrambles and index after refresh.",
       "evidence": [
-        "frontend/src/hooks/useEmailPasswordAuth.tsx (uses `type { backendInterface, AuthenticatedPrincipal } from '../backend'` but no diff shown for `../backend` types)"
+        "frontend/src/hooks/usePracticeSessionPersistence.ts",
+        "frontend/src/hooks/usePracticeScrambles.ts",
+        "frontend/src/components/practice/PracticeReady.tsx",
+        "frontend/src/components/practice/PracticeScreen.tsx"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Apply a coherent dark, competition-focused visual theme for Practice screens using a charcoal/graphite base with high-contrast accents (avoid blue & purple).",
+      "reason": "The dark-mode base variables use a hue of 270 (blue/purple-leaning) for background/card/popover, which conflicts with the requirement to avoid blue/purple and to use a charcoal/graphite base for the Practice flow.",
+      "evidence": [
+        "frontend/src/index.css"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.62,
+  "hallucinated_features": [
+    {
+      "description": "Added backend migration module and profile/authorization-focused backend behavior (access control mixin, anonymous-user traps for profile queries) that is not requested as part of removing email/password auth.",
+      "reason": "BuildRequest only asks to remove email/password auth endpoints/logic; it does not request introducing migration scaffolding or new authorization/profile access patterns.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Expanded/changed timer functionality (inspection countdown behavior, penalties, RAF timing, audio warnings, etc.) beyond the Practice/auth changes requested.",
+      "reason": "The BuildRequest does not ask for timer control/inspection logic enhancements; these appear as additional unrequested changes.",
+      "evidence": [
+        "frontend-file-summaries.txt (useWcaTimerControls.ts, TimerDisplay.tsx, inspectionAudio.ts)"
+      ]
+    },
+    {
+      "description": "Added cookie-based persistence for the main timer session (event/scramble/solves) independent of the Practice persistence requirement.",
+      "reason": "BuildRequest only specifies browser-only persistence for the Practice Session, not additional persistence for the core timer experience.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/lib/sessionCookie.ts, frontend/src/hooks/useWcaScramble.ts)"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AccountModal.tsx",
     "frontend/src/components/LoginModal.tsx",
+    "frontend/src/components/TimerScreen.tsx",
+    "frontend/src/components/practice/PracticeBrowseCompetitions.tsx",
+    "frontend/src/components/practice/PracticeReady.tsx",
+    "frontend/src/components/practice/PracticeScreen.tsx",
+    "frontend/src/components/practice/PracticeSelectEvent.tsx",
     "frontend/src/hooks/useEmailPasswordAuth.tsx",
+    "frontend/src/hooks/useFirstVisitLoginPrompt.ts",
+    "frontend/src/hooks/usePracticeScrambles.ts",
+    "frontend/src/hooks/usePracticeSessionPersistence.ts",
+    "frontend/src/hooks/useWcaCompetitionDetails.ts",
+    "frontend/src/hooks/useWcaUpcomingCompetitions.ts",
+    "frontend/src/index.css",
+    "frontend/src/lib/wcaCountries.ts",
+    "frontend/src/types/cubing-cdn.d.ts",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

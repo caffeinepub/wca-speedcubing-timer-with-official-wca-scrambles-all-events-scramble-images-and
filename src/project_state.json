@@ -1,26 +1,78 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [
-    "Account creation/signup attempt results in nothing happening (no error shown)."
+  "summary": "Build a WCA competition-based practice session feature (fetch upcoming competitions from WCA API, filter/search, select competition and event, generate WCA-standard scrambles via external API, store practice data in the browser). Remove all login/signup functionality for now.",
+  "architectural_notes": [
+    "Upcoming competitions data source: official WCA API (external HTTP fetch).",
+    "Scramble generation: use an external API to obtain WCA-standard scrambles.",
+    "Practice session persistence: client-side only (browser storage such as localStorage/IndexedDB); no canister persistence."
   ],
-  "isFixRequest": true,
+  "known_issues": [
+    "Draft app expired and needs rebuild before further changes can be previewed/deployed."
+  ],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-react-email-password-auth-hook-to-match-the-backend-s-actual-return-types-for-signup-login-validatesession-and-logout-and-ensure-all-failures-surface-a-user-visible-error-in-the-login-signup-modal-no-silent-failures",
-      "title": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
+      "id": "feature-remove-all-login-signup-authentication-functionality-from-the-frontend-ui-so-the-app-is-fully-usable-without-any-login-including-removing-or-disabling-the-login-modal-account-modal-and-any-header-account-controls-that-depend-on-authentication-state",
+      "title": "Remove all login/signup/authentication functionality from the frontend UI so the app is fully usable without any login, including removing or disabling the Login modal, Account modal, and any header/account controls that depend on authentication state.",
       "reqIds": [
-        "REQ-2"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-regenerate-update-the-frontend-backend-actor-type-declarations-so-the-compiled-frontend-actor-type-includes-the-newly-supported-signup-login-validatesession-and-logout-methods-eliminating-runtime-mismatches-between-declared-and-deployed-canister-interfaces",
-      "title": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
+      "id": "feature-add-a-new-practice-session-feature-accessible-from-the-main-ui-alongside-the-existing-timer-experience-with-a-dedicated-entry-point-labeled-practice-english-ui-text",
+      "title": "Add a new Practice Session feature accessible from the main UI (alongside the existing timer experience), with a dedicated entry point labeled “Practice” (English UI text).",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-practice-page-fetch-and-display-the-list-of-upcoming-wca-competitions-from-the-official-wca-api-and-render-them-in-a-scrollable-list-with-competition-name-and-location-metadata-when-available",
+      "title": "On the Practice page, fetch and display the list of upcoming WCA competitions from the official WCA API, and render them in a scrollable list with competition name and location metadata when available.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-filtering-on-the-practice-competitions-list-1-filter-by-country-and-2-search-by-competition-name-or-country-name-case-insensitive",
+      "title": "Provide filtering on the Practice competitions list: (1) filter by country and (2) search by competition name or country name (case-insensitive).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-after-a-competition-is-selected-display-its-available-events-and-allow-the-user-to-select-an-event-to-practice",
+      "title": "After a competition is selected, display its available events and allow the user to select an event to practice.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-practice-ready-page-generate-and-display-5-random-wca-standard-scrambles-for-the-selected-event-matching-the-scramble-1-5-style-shown-in-the-uploaded-reference-images",
+      "title": "On the Practice “ready” page, generate and display 5 random WCA-standard scrambles for the selected event, matching the “Scramble 1/5” style shown in the uploaded reference images.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-practice-session-state-in-the-browser-only-no-canister-persistence-at-minimum-save-the-selected-competition-selected-event-generated-5-scrambles-and-the-user-s-current-scramble-index-so-that-a-refresh-restores-the-session",
+      "title": "Persist Practice Session state in the browser only (no canister persistence): at minimum save the selected competition, selected event, generated 5 scrambles, and the user’s current scramble index so that a refresh restores the session.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-coherent-dark-competition-focused-visual-theme-consistent-across-the-new-practice-flow-screens-browse-competitions-select-event-ready-page-using-a-charcoal-graphite-base-with-high-contrast-accents-avoid-blue-purple",
+      "title": "Apply a coherent dark, competition-focused visual theme consistent across the new Practice flow screens (browse competitions, select event, ready page), using a charcoal/graphite base with high-contrast accents (avoid blue & purple).",
+      "reqIds": [
+        "REQ-9"
       ],
       "version": 1
     }
@@ -28,14 +80,38 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Update the Motoko backend email/password authentication API so the actor exposes `signup`, `login`, `validateSession`, and `logout` methods with stable, structured return types compatible with the frontend’s expectations (i.e., Result-style responses that include a session token and user info on success, and an error message on failure).",
+      "summary": "Remove all login/signup/authentication functionality (email/password and any other login) for now; no login required",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Practice Session feature: fetch upcoming WCA competitions from official WCA API; list with filter by country and search by competition/country name; select competition then event",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Practice Session ready page: generate 5 random WCA-standard scrambles via an external scramble API for the selected event",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Persist practice session data client-side in the browser only (no backend storage)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Remove all email/password authentication logic from the backend canister interface (signup/login/logout/profile session behavior) so the backend no longer exposes or depends on email/password auth for core app usage.",
       "reqIds": [
-        "REQ-1"
+        "REQ-2"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix email/password signup doing nothing by aligning frontend auth calls with backend actor methods",
+  "projectName": "Remove authentication and add WCA competition-based Practice Session flow (WCA API + 5 scrambles, browser-only persistence)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

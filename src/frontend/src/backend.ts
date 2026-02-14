@@ -89,70 +89,10 @@ export class ExternalBlob {
         return this;
     }
 }
-export type Timestamp = bigint;
-export type SignupResult = {
-    __kind__: "failure";
-    failure: {
-        message: string;
-    };
-} | {
-    __kind__: "success";
-    success: {
-        user: AuthenticatedPrincipal;
-        session?: Session;
-        message: string;
-        sessionToken: string;
-    };
-};
-export interface Session {
-    created: Timestamp;
-    token: AuthToken;
-    lastAccessed: Timestamp;
-    expiration: Timestamp;
-}
-export type AuthenticatedPrincipal = {
-    __kind__: "internetIdentity";
-    internetIdentity: Principal;
-} | {
-    __kind__: "emailPassword";
-    emailPassword: Email;
-};
-export type LogoutResult = {
-    __kind__: "failure";
-    failure: {
-        message: string;
-    };
-} | {
-    __kind__: "success";
-    success: {
-        message: string;
-    };
-};
-export type AuthToken = string;
-export type LoginResult = {
-    __kind__: "failure";
-    failure: {
-        message: string;
-    };
-} | {
-    __kind__: "success";
-    success: {
-        user: AuthenticatedPrincipal;
-        session?: Session;
-        message: string;
-        sessionToken: string;
-    };
-};
-export interface SessionValidationResult {
-    user?: AuthenticatedPrincipal;
-    session?: Session;
-    message: string;
-    isValid: boolean;
-}
 export interface UserProfile {
     name: string;
+    wcaId?: string;
 }
-export type Email = string;
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -165,13 +105,9 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    login(email: string, password: string): Promise<LoginResult>;
-    logout(token: string): Promise<LogoutResult>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    signup(email: string, password: string): Promise<SignupResult>;
-    validateSession(token: string): Promise<SessionValidationResult>;
 }
-import type { AuthenticatedPrincipal as _AuthenticatedPrincipal, Email as _Email, LoginResult as _LoginResult, LogoutResult as _LogoutResult, Session as _Session, SessionValidationResult as _SessionValidationResult, SignupResult as _SignupResult, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -220,14 +156,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n7(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n7(this._uploadFile, this._downloadFile, result);
         }
     }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
@@ -258,187 +194,46 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async login(arg0: string, arg1: string): Promise<LoginResult> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.login(arg0, arg1);
-                return from_candid_LoginResult_n6(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.login(arg0, arg1);
-            return from_candid_LoginResult_n6(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async logout(arg0: string): Promise<LogoutResult> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.logout(arg0);
-                return from_candid_LogoutResult_n12(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.logout(arg0);
-            return from_candid_LogoutResult_n12(this._uploadFile, this._downloadFile, result);
-        }
-    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveCallerUserProfile(arg0);
+                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n9(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveCallerUserProfile(arg0);
+            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n9(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
-    async signup(arg0: string, arg1: string): Promise<SignupResult> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.signup(arg0, arg1);
-                return from_candid_SignupResult_n14(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.signup(arg0, arg1);
-            return from_candid_SignupResult_n14(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async validateSession(arg0: string): Promise<SessionValidationResult> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.validateSession(arg0);
-                return from_candid_SessionValidationResult_n15(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.validateSession(arg0);
-            return from_candid_SessionValidationResult_n15(this._uploadFile, this._downloadFile, result);
-        }
-    }
 }
-function from_candid_AuthenticatedPrincipal_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _AuthenticatedPrincipal): AuthenticatedPrincipal {
-    return from_candid_variant_n10(_uploadFile, _downloadFile, value);
+function from_candid_UserProfile_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserProfile): UserProfile {
+    return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_LoginResult_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _LoginResult): LoginResult {
-    return from_candid_variant_n7(_uploadFile, _downloadFile, value);
-}
-function from_candid_LogoutResult_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _LogoutResult): LogoutResult {
-    return from_candid_variant_n13(_uploadFile, _downloadFile, value);
-}
-function from_candid_SessionValidationResult_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SessionValidationResult): SessionValidationResult {
-    return from_candid_record_n16(_uploadFile, _downloadFile, value);
-}
-function from_candid_SignupResult_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SignupResult): SignupResult {
-    return from_candid_variant_n7(_uploadFile, _downloadFile, value);
-}
-function from_candid_UserRole_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n5(_uploadFile, _downloadFile, value);
-}
-function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Session]): Session | null {
-    return value.length === 0 ? null : value[0];
-}
-function from_candid_opt_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_AuthenticatedPrincipal]): AuthenticatedPrincipal | null {
-    return value.length === 0 ? null : from_candid_AuthenticatedPrincipal_n9(_uploadFile, _downloadFile, value[0]);
+function from_candid_UserRole_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n8(_uploadFile, _downloadFile, value);
 }
 function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
+    return value.length === 0 ? null : from_candid_UserProfile_n4(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    user: [] | [_AuthenticatedPrincipal];
-    session: [] | [_Session];
-    message: string;
-    isValid: boolean;
+function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    name: string;
+    wcaId: [] | [string];
 }): {
-    user?: AuthenticatedPrincipal;
-    session?: Session;
-    message: string;
-    isValid: boolean;
+    name: string;
+    wcaId?: string;
 } {
     return {
-        user: record_opt_to_undefined(from_candid_opt_n17(_uploadFile, _downloadFile, value.user)),
-        session: record_opt_to_undefined(from_candid_opt_n11(_uploadFile, _downloadFile, value.session)),
-        message: value.message,
-        isValid: value.isValid
+        name: value.name,
+        wcaId: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.wcaId))
     };
 }
-function from_candid_record_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    user: _AuthenticatedPrincipal;
-    session: [] | [_Session];
-    message: string;
-    sessionToken: string;
-}): {
-    user: AuthenticatedPrincipal;
-    session?: Session;
-    message: string;
-    sessionToken: string;
-} {
-    return {
-        user: from_candid_AuthenticatedPrincipal_n9(_uploadFile, _downloadFile, value.user),
-        session: record_opt_to_undefined(from_candid_opt_n11(_uploadFile, _downloadFile, value.session)),
-        message: value.message,
-        sessionToken: value.sessionToken
-    };
-}
-function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    internetIdentity: Principal;
-} | {
-    emailPassword: _Email;
-}): {
-    __kind__: "internetIdentity";
-    internetIdentity: Principal;
-} | {
-    __kind__: "emailPassword";
-    emailPassword: Email;
-} {
-    return "internetIdentity" in value ? {
-        __kind__: "internetIdentity",
-        internetIdentity: value.internetIdentity
-    } : "emailPassword" in value ? {
-        __kind__: "emailPassword",
-        emailPassword: value.emailPassword
-    } : value;
-}
-function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    failure: {
-        message: string;
-    };
-} | {
-    success: {
-        message: string;
-    };
-}): {
-    __kind__: "failure";
-    failure: {
-        message: string;
-    };
-} | {
-    __kind__: "success";
-    success: {
-        message: string;
-    };
-} {
-    return "failure" in value ? {
-        __kind__: "failure",
-        failure: value.failure
-    } : "success" in value ? {
-        __kind__: "success",
-        success: value.success
-    } : value;
-}
-function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
     user: null;
@@ -447,41 +242,23 @@ function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
-function from_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    failure: {
-        message: string;
-    };
-} | {
-    success: {
-        user: _AuthenticatedPrincipal;
-        session: [] | [_Session];
-        message: string;
-        sessionToken: string;
-    };
-}): {
-    __kind__: "failure";
-    failure: {
-        message: string;
-    };
-} | {
-    __kind__: "success";
-    success: {
-        user: AuthenticatedPrincipal;
-        session?: Session;
-        message: string;
-        sessionToken: string;
-    };
-} {
-    return "failure" in value ? {
-        __kind__: "failure",
-        failure: value.failure
-    } : "success" in value ? {
-        __kind__: "success",
-        success: from_candid_record_n8(_uploadFile, _downloadFile, value.success)
-    } : value;
+function to_candid_UserProfile_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
+    return to_candid_record_n10(_uploadFile, _downloadFile, value);
 }
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_record_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    name: string;
+    wcaId?: string;
+}): {
+    name: string;
+    wcaId: [] | [string];
+} {
+    return {
+        name: value.name,
+        wcaId: value.wcaId ? candid_some(value.wcaId) : candid_none()
+    };
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
     admin: null;

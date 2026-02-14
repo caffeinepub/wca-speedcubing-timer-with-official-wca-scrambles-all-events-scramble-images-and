@@ -41,6 +41,10 @@
         --timer-armed: 0.55 0.22 140;
         --timer-running: 0.65 0.20 45;
         --timer-stopped: 0.55 0.22 140;
+        
+        /* Practice theme colors - Green/Teal palette */
+        --practice-primary: 0.60 0.18 160;
+        --practice-secondary: 0.65 0.16 180;
     }
 
     .dark {
@@ -78,6 +82,10 @@
         --timer-armed: 0.65 0.20 140;
         --timer-running: 0.70 0.22 45;
         --timer-stopped: 0.65 0.20 140;
+        
+        /* Practice theme colors for dark mode - Green/Teal */
+        --practice-primary: 0.65 0.20 160;
+        --practice-secondary: 0.70 0.18 180;
     }
 
     * {
@@ -114,5 +122,21 @@
     
     .bg-timer-secondary {
         background-color: oklch(var(--timer-secondary));
+    }
+    
+    .text-practice-primary {
+        color: oklch(var(--practice-primary));
+    }
+    
+    .bg-practice-primary {
+        background-color: oklch(var(--practice-primary));
+    }
+    
+    .bg-practice-secondary {
+        background-color: oklch(var(--practice-secondary));
+    }
+    
+    .border-practice-primary {
+        border-color: oklch(var(--practice-primary));
     }
 }

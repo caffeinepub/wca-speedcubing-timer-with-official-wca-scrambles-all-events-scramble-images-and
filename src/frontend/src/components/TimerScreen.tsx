@@ -5,27 +5,22 @@ import { ScrambleVisualizer } from './ScrambleVisualizer';
 import { TimerDisplay } from './TimerDisplay';
 import { SolveHistory } from './SolveHistory';
 import { SessionStats } from './SessionStats';
-import { LoginModal } from './LoginModal';
+import { PracticeScreen } from './practice/PracticeScreen';
 import { useWcaScramble } from '../hooks/useWcaScramble';
 import { useWcaTimerControls } from '../hooks/useWcaTimerControls';
-import { useEmailPasswordAuth } from '../hooks/useEmailPasswordAuth';
 import { SolveEntry } from '../types/solves';
 import { computeSessionStats } from '../lib/sessionStats';
 import { saveSessionData, loadSessionData } from '../lib/sessionCookie';
 import { SiGithub } from 'react-icons/si';
-import { Heart, LogIn, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-const FIRST_VISIT_KEY = 'wca-timer-first-visit-seen';
+import { Heart, Timer, Trophy } from 'lucide-react';
+import { Button } from './ui/button';
 
 export function TimerScreen() {
   const [selectedEvent, setSelectedEvent] = useState('333');
   const [solves, setSolves] = useState<SolveEntry[]>([]);
   const [initialScramble, setInitialScramble] = useState<string | undefined>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-
-  const { isAuthenticated, isRestoringSession, logout, user } = useEmailPasswordAuth();
+  const [showPractice, setShowPractice] = useState(false);
 
   // Load session data on mount
   useEffect(() => {
@@ -37,41 +32,6 @@ export function TimerScreen() {
     }
     setIsInitialized(true);
   }, []);
-
-  // Auto-open login modal on first visit for unauthenticated users
-  useEffect(() => {
-    // Wait for session restoration to complete
-    if (isRestoringSession) return;
-
-    // Check if user is authenticated
-    if (isAuthenticated) return;
-
-    // Check if first-visit modal has been shown before
-    const hasSeenModal = localStorage.getItem(FIRST_VISIT_KEY);
-    if (!hasSeenModal) {
-      setLoginModalOpen(true);
-    }
-  }, [isRestoringSession, isAuthenticated]);
-
-  // Handle modal close or successful auth
-  const handleModalClose = (open: boolean) => {
-    setLoginModalOpen(open);
-    if (!open) {
-      // Mark as seen when modal is dismissed
-      localStorage.setItem(FIRST_VISIT_KEY, 'true');
-    }
-  };
-
-  const handleAuthSuccess = () => {
-    // Mark as seen on successful authentication
-    localStorage.setItem(FIRST_VISIT_KEY, 'true');
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    // Optionally clear local session data on logout
-    // setSolves([]);
-  };
 
   const { scramble, isGenerating, generateScramble, setScramble } = useWcaScramble(
     selectedEvent,
@@ -128,6 +88,10 @@ export function TimerScreen() {
 
   const stats = computeSessionStats(solves);
 
+  if (showPractice) {
+    return <PracticeScreen onBack={() => setShowPractice(false)} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
@@ -143,28 +107,15 @@ export function TimerScreen() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isAuthenticated ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                aria-label="Sign out"
-                className="text-muted-foreground hover:text-foreground"
-                title={user?.email || 'Sign out'}
-              >
-                <LogOut className="w-5 h-5" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setLoginModalOpen(true)}
-                aria-label="Sign in"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <LogIn className="w-5 h-5" />
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPractice(true)}
+              className="gap-2"
+            >
+              <Trophy className="w-4 h-4" />
+              <span className="hidden sm:inline">Practice</span>
+            </Button>
             <a
               href="https://github.com/cubing/cubing.js"
               target="_blank"
@@ -176,13 +127,6 @@ export function TimerScreen() {
           </div>
         </div>
       </header>
-
-      {/* Login Modal */}
-      <LoginModal
-        open={loginModalOpen}
-        onOpenChange={handleModalClose}
-        onAuthSuccess={handleAuthSuccess}
-      />
 
       {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-6 flex flex-col gap-6">

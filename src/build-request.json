@@ -1,72 +1,182 @@
 {
   "kind": "build_request",
-  "title": "Fix email/password signup doing nothing by aligning frontend auth calls with backend actor methods",
-  "priority": "high",
+  "title": "Remove authentication and add WCA competition-based Practice Session flow (WCA API + 5 scrambles, browser-only persistence)",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the Motoko backend email/password authentication API so the actor exposes `signup`, `login`, `validateSession`, and `logout` methods with stable, structured return types compatible with the frontend’s expectations (i.e., Result-style responses that include a session token and user info on success, and an error message on failure).",
-      "target": "backend",
+      "text": "Remove all login/signup/authentication functionality from the frontend UI so the app is fully usable without any login, including removing or disabling the Login modal, Account modal, and any header/account controls that depend on authentication state.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "Tried to create account Nothing happens no error or anything"
+          "So for the time we will proceed with full removing login functions and no other login or signup required at this time."
         ]
       },
       "acceptanceCriteria": [
-        "Backend canister exports callable methods named `signup`, `login`, `validateSession`, and `logout` (no \"is not a function\" errors from the frontend).",
-        "`signup(email, password)` returns success with a session token and user identifier when the email is not already registered, and returns a clear error message when it is already registered.",
-        "`login(email, password)` returns success with a session token and user info when credentials are valid, and a clear error message when invalid.",
-        "`validateSession(token)` returns success with user info for a valid/unexpired token, and a clear failure response for invalid/expired tokens.",
-        "`logout(token)` invalidates the session token so subsequent `validateSession(token)` calls fail."
+        "The app has no visible Login/Sign Up entry points (no Login button, no auth dropdown, no auth modals).",
+        "Timer-related features (event select, scramble, timer, stats, solve history) work without any authentication state.",
+        "No frontend code references the email/password auth hook/provider in runtime paths (build compiles cleanly)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the React email/password auth hook to match the backend’s actual return types for `signup`, `login`, `validateSession`, and `logout`, and ensure all failures surface a user-visible error in the login/signup modal (no silent failures).",
-      "target": "frontend",
+      "text": "Remove all email/password authentication logic from the backend canister interface (signup/login/logout/profile session behavior) so the backend no longer exposes or depends on email/password auth for core app usage.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "Tried to create account Nothing happens no error or anything"
+          "proceed with full removing login functions and no other login or signup required at this time"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking “Sign Up” shows a loading state immediately and then either authenticates the user (closing the modal) or displays a readable error message inside the modal.",
-        "If the backend call throws (network/canister error), the error is caught and shown in the modal rather than failing silently.",
-        "Session restoration on page load uses `validateSession` and correctly sets authenticated state when the stored token is valid; invalid tokens are removed from localStorage.",
-        "No uncaught exceptions are produced in the browser console during signup/login/restore flows."
+        "`backend/main.mo` no longer exposes callable methods for `signup`, `login`, and `logout` as a required app flow.",
+        "Backend builds successfully under the single-actor architecture.",
+        "Frontend builds successfully against the updated backend bindings (no type or import errors)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Regenerate/update the frontend backend-actor type declarations so the compiled frontend actor type includes the newly supported `signup`, `login`, `validateSession`, and `logout` methods (eliminating runtime mismatches between declared and deployed canister interfaces).",
-      "target": "both",
+      "text": "Add a new Practice Session feature accessible from the main UI (alongside the existing timer experience), with a dedicated entry point labeled “Practice” (English UI text).",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "recent-messages"
         ],
         "quotes": [
-          "Try again"
+          "We needto implement a function as practice session whereusers can practic for wca listedd competions. When user select practic page, they will see the available wca listed from upcoming list"
         ]
       },
       "acceptanceCriteria": [
-        "Frontend build output includes the auth methods on the actor instance created by `createActorWithConfig`.",
-        "Manual test: opening the signup modal and submitting valid inputs performs a canister call (visible in network/agent logs) rather than failing due to missing methods."
+        "A user can navigate to a “Practice” area from within the app without logging in.",
+        "Navigation does not rely on modifying any immutable frontend paths listed in SYSTEM_CONTEXT."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "On the Practice page, fetch and display the list of upcoming WCA competitions from the official WCA API, and render them in a scrollable list with competition name and location metadata when available.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Fetch from wca official api"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Upcoming competitions are fetched client-side from the official WCA API over HTTPS.",
+        "A loading state and an error state are shown if the request is in progress or fails.",
+        "Competitions render as a list; selecting a competition advances to the next step."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Provide filtering on the Practice competitions list: (1) filter by country and (2) search by competition name or country name (case-insensitive).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "they can filter it based on country or search with competition name or country name"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A user can restrict the list to a chosen country (via dropdown or equivalent).",
+        "A user can type a query that filters by competition name or country name.",
+        "Filters can be cleared to return to the full upcoming list."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "After a competition is selected, display its available events and allow the user to select an event to practice.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "They can select the competition then it will show the events and they can select"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Selected competition view shows a list/grid of events for that competition.",
+        "Selecting an event advances to a “ready”/practice session screen for that competition+event."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "On the Practice “ready” page, generate and display 5 random WCA-standard scrambles for the selected event, matching the “Scramble 1/5” style shown in the uploaded reference images.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "the ready page will 5 random generated scrambled for them everything just like the image attached",
+          "2. Yes please"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Exactly 5 scrambles are generated for the selected event and displayed to the user.",
+        "The UI indicates the current scramble index (e.g., “Scramble 1/5”).",
+        "A user can move through the set of 5 scrambles (next/previous or equivalent) without regenerating the entire set unless they explicitly refresh/regenerate."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Persist Practice Session state in the browser only (no canister persistence): at minimum save the selected competition, selected event, generated 5 scrambles, and the user’s current scramble index so that a refresh restores the session.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Let's save it in browser itself"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Practice session state is restored after a page refresh in the same browser.",
+        "No backend calls are used to store practice session state.",
+        "There is a clear way for the user to reset/clear the saved practice session state from the UI."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Apply a coherent dark, competition-focused visual theme consistent across the new Practice flow screens (browse competitions, select event, ready page), using a charcoal/graphite base with high-contrast accents (avoid blue & purple).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "everything just like the image attached"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Practice pages share a consistent layout system (spacing, cards, typography) with the existing app styling.",
+        "Theme uses a dark base with non-blue/non-purple accent colors consistently applied to interactive elements and highlights.",
+        "All user-facing text for the Practice feature is in English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under `frontend/src/hooks/useActor.ts`, `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/main.tsx`, or anything in `frontend/src/components/ui` (they are immutable).",
-    "Keep all backend logic in the single Motoko actor (`backend/main.mo`); only add `backend/migration.mo` if a state migration is strictly necessary."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui (compose them only).",
+    "Do not edit any frontend immutablePaths listed in SYSTEM_CONTEXT.",
+    "Do not add Firebase or Auth0 authentication (not supported on this platform).",
+    "Practice session persistence must be browser-only (no backend storage)."
   ],
   "nonGoals": [
-    "Implementing secure password hashing, email verification, password reset, or production-grade account security (current flow is explicitly demo/insecure).",
-    "Adding third-party authentication providers beyond Internet Identity."
+    "Implementing Firebase/Auth0/third-party authentication.",
+    "Building real-time multiplayer/rooms/chat features.",
+    "Storing practice sessions or user history in the canister.",
+    "Implementing WCA registration or pulling private user data from WCA."
   ],
   "imageRequirements": {
     "required": [],

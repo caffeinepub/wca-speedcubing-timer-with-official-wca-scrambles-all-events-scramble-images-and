@@ -10,44 +10,7 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export type AuthToken = string;
-export type AuthenticatedPrincipal = { 'internetIdentity' : Principal } |
-  { 'emailPassword' : Email };
-export type Email = string;
-export type LoginResult = { 'failure' : { 'message' : string } } |
-  {
-    'success' : {
-      'user' : AuthenticatedPrincipal,
-      'session' : [] | [Session],
-      'message' : string,
-      'sessionToken' : string,
-    }
-  };
-export type LogoutResult = { 'failure' : { 'message' : string } } |
-  { 'success' : { 'message' : string } };
-export interface Session {
-  'created' : Timestamp,
-  'token' : AuthToken,
-  'lastAccessed' : Timestamp,
-  'expiration' : Timestamp,
-}
-export interface SessionValidationResult {
-  'user' : [] | [AuthenticatedPrincipal],
-  'session' : [] | [Session],
-  'message' : string,
-  'isValid' : boolean,
-}
-export type SignupResult = { 'failure' : { 'message' : string } } |
-  {
-    'success' : {
-      'user' : AuthenticatedPrincipal,
-      'session' : [] | [Session],
-      'message' : string,
-      'sessionToken' : string,
-    }
-  };
-export type Timestamp = bigint;
-export interface UserProfile { 'name' : string }
+export interface UserProfile { 'name' : string, 'wcaId' : [] | [string] }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -58,11 +21,7 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'login' : ActorMethod<[string, string], LoginResult>,
-  'logout' : ActorMethod<[string], LogoutResult>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'signup' : ActorMethod<[string, string], SignupResult>,
-  'validateSession' : ActorMethod<[string], SessionValidationResult>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

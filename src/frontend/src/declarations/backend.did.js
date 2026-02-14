@@ -13,47 +13,9 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
-export const Email = IDL.Text;
-export const AuthenticatedPrincipal = IDL.Variant({
-  'internetIdentity' : IDL.Principal,
-  'emailPassword' : Email,
-});
-export const Timestamp = IDL.Int;
-export const AuthToken = IDL.Text;
-export const Session = IDL.Record({
-  'created' : Timestamp,
-  'token' : AuthToken,
-  'lastAccessed' : Timestamp,
-  'expiration' : Timestamp,
-});
-export const LoginResult = IDL.Variant({
-  'failure' : IDL.Record({ 'message' : IDL.Text }),
-  'success' : IDL.Record({
-    'user' : AuthenticatedPrincipal,
-    'session' : IDL.Opt(Session),
-    'message' : IDL.Text,
-    'sessionToken' : IDL.Text,
-  }),
-});
-export const LogoutResult = IDL.Variant({
-  'failure' : IDL.Record({ 'message' : IDL.Text }),
-  'success' : IDL.Record({ 'message' : IDL.Text }),
-});
-export const SignupResult = IDL.Variant({
-  'failure' : IDL.Record({ 'message' : IDL.Text }),
-  'success' : IDL.Record({
-    'user' : AuthenticatedPrincipal,
-    'session' : IDL.Opt(Session),
-    'message' : IDL.Text,
-    'sessionToken' : IDL.Text,
-  }),
-});
-export const SessionValidationResult = IDL.Record({
-  'user' : IDL.Opt(AuthenticatedPrincipal),
-  'session' : IDL.Opt(Session),
-  'message' : IDL.Text,
-  'isValid' : IDL.Bool,
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'wcaId' : IDL.Opt(IDL.Text),
 });
 
 export const idlService = IDL.Service({
@@ -67,15 +29,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'login' : IDL.Func([IDL.Text, IDL.Text], [LoginResult], []),
-  'logout' : IDL.Func([IDL.Text], [LogoutResult], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'signup' : IDL.Func([IDL.Text, IDL.Text], [SignupResult], []),
-  'validateSession' : IDL.Func(
-      [IDL.Text],
-      [SessionValidationResult],
-      ['query'],
-    ),
 });
 
 export const idlInitArgs = [];
@@ -86,47 +40,9 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
-  const Email = IDL.Text;
-  const AuthenticatedPrincipal = IDL.Variant({
-    'internetIdentity' : IDL.Principal,
-    'emailPassword' : Email,
-  });
-  const Timestamp = IDL.Int;
-  const AuthToken = IDL.Text;
-  const Session = IDL.Record({
-    'created' : Timestamp,
-    'token' : AuthToken,
-    'lastAccessed' : Timestamp,
-    'expiration' : Timestamp,
-  });
-  const LoginResult = IDL.Variant({
-    'failure' : IDL.Record({ 'message' : IDL.Text }),
-    'success' : IDL.Record({
-      'user' : AuthenticatedPrincipal,
-      'session' : IDL.Opt(Session),
-      'message' : IDL.Text,
-      'sessionToken' : IDL.Text,
-    }),
-  });
-  const LogoutResult = IDL.Variant({
-    'failure' : IDL.Record({ 'message' : IDL.Text }),
-    'success' : IDL.Record({ 'message' : IDL.Text }),
-  });
-  const SignupResult = IDL.Variant({
-    'failure' : IDL.Record({ 'message' : IDL.Text }),
-    'success' : IDL.Record({
-      'user' : AuthenticatedPrincipal,
-      'session' : IDL.Opt(Session),
-      'message' : IDL.Text,
-      'sessionToken' : IDL.Text,
-    }),
-  });
-  const SessionValidationResult = IDL.Record({
-    'user' : IDL.Opt(AuthenticatedPrincipal),
-    'session' : IDL.Opt(Session),
-    'message' : IDL.Text,
-    'isValid' : IDL.Bool,
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'wcaId' : IDL.Opt(IDL.Text),
   });
   
   return IDL.Service({
@@ -140,15 +56,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'login' : IDL.Func([IDL.Text, IDL.Text], [LoginResult], []),
-    'logout' : IDL.Func([IDL.Text], [LogoutResult], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'signup' : IDL.Func([IDL.Text, IDL.Text], [SignupResult], []),
-    'validateSession' : IDL.Func(
-        [IDL.Text],
-        [SessionValidationResult],
-        ['query'],
-      ),
   });
 };
 

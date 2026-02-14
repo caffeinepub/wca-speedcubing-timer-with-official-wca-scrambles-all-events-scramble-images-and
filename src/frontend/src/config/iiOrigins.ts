@@ -19,5 +19,6 @@ export const II_DERIVATION_ORIGIN = 'https://mcubes.net';
  * ['https://mcubes.net', 'https://newdomain.com']
  */
 export const II_ALTERNATIVE_ORIGINS: string[] = [
-  'https://mcubes.net'
+  'https://mcubes.net',
+  'https://mcubes.online'
 ];
